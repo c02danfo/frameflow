@@ -37,3 +37,4 @@ logs/
 .vscode/
 .idea/
 ~
+docker-compose.local.override.yml
