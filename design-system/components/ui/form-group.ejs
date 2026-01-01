@@ -1,0 +1,15 @@
+<div class="form-group <%= locals.classes || '' %>">
+    <% if (locals.label) { %>
+        <%- include('./label.ejs', { id: id, text: label, required: locals.required }) %>
+    <% } %>
+    
+    <%- body %>
+    
+    <% if (locals.helpText) { %>
+        <p class="mt-1 text-xs text-slate-500"><%= helpText %></p>
+    <% } %>
+    
+    <% if (locals.error) { %>
+        <p class="mt-1 text-xs text-red-600"><%= error %></p>
+    <% } %>
+</div>

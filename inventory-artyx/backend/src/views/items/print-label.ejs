@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Print Label - <%= item.name %></title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    
+    .label-container {
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .label {
+      background: white;
+      padding: 20px;
+      border: 2px solid #333;
+      border-radius: 4px;
+      text-align: center;
+      page-break-inside: avoid;
+    }
+    
+    .item-name {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      word-break: break-word;
+      max-height: 50px;
+      overflow: hidden;
+    }
+    
+    .item-sku {
+      font-size: 11px;
+      color: #666;
+      margin-bottom: 10px;
+      font-family: monospace;
+    }
+    
+    .barcode-container {
+      margin: 15px 0;
+      display: flex;
+      justify-content: center;
+    }
+    
+    .barcode-container img {
+      max-width: 100%;
+      height: auto;
+      max-height: 80px;
+    }
+    
+    .barcode-number {
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      margin-top: 5px;
+    }
+    
+    .controls {
+      margin-top: 20px;
+      text-align: center;
+      display: no-print;
+    }
+    
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      margin: 5px;
+      background: #0ea5e9;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      text-decoration: none;
+    }
+    
+    .btn:hover {
+      background: #0284c7;
+    }
+    
+    .btn-secondary {
+      background: #6b7280;
+    }
+    
+    .btn-secondary:hover {
+      background: #4b5563;
+    }
+    
+    @media print {
+      body {
+        padding: 0;
+        background: white;
+      }
+      
+      .label-container {
+        max-width: 100%;
+        box-shadow: none;
+        padding: 0;
+        border-radius: 0;
+      }
+      
+      .controls {
+        display: none;
+      }
+      
+      .label {
+        border: 1px solid #999;
+        width: 100mm;
+        height: 60mm;
+        padding: 8mm;
+        margin: 0;
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="label-container">
+    <div class="label">
+      <div class="item-name"><%= item.name %></div>
+      <div class="item-sku">SKU: <%= item.sku %></div>
+      
+      <div class="barcode-container">
+        <div>
+          <img src="/items/<%= item.id %>/barcode.png" alt="Barcode" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%2280%22%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 font-family=%22Arial%22 font-size=%2214%22%3E⚠ Barcode Error%3C/text%3E%3C/svg%3E'">
+          <div class="barcode-number"><%= item.barcode || 'No barcode' %></div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="controls">
+      <button class="btn" onclick="window.print()">🖨️ Print Label</button>
+      <button class="btn btn-secondary" onclick="window.history.back()">← Back</button>
+    </div>
+  </div>
+</body>
+</html>

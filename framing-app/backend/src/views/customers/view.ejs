@@ -1,0 +1,113 @@
+<div class="max-w-screen-2xl mx-auto">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-4">
+            <a href="/customers" class="inline-flex items-center px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded-lg transition-colors">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+            </a>
+            <div>
+                <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight"><%= customer.name %></h2>
+                <p class="text-sm font-medium text-slate-500">Kunddetaljer och orderhistorik</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="/customers/<%= customer.id %>/edit" class="inline-flex items-center px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded-lg transition-colors">
+                Redigera
+            </a>
+            <a href="/orders/new?customer_id=<%= customer.id %>" class="inline-flex items-center px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
+                Ny order
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Customer Info -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Kontaktinformation</h3>
+                <div class="space-y-6">
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight mb-1">Email</p>
+                        <p class="text-sm font-medium text-slate-900"><%= customer.email || '-' %></p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight mb-1">Telefon</p>
+                        <p class="text-sm font-medium text-slate-900"><%= customer.phone || '-' %></p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight mb-1">Adress</p>
+                        <p class="text-sm font-medium text-slate-900 whitespace-pre-line"><%= customer.address || '-' %></p>
+                    </div>
+                    <% if (customer.notes) { %>
+                        <div class="pt-6 border-t border-slate-100">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight mb-1">Anteckningar</p>
+                            <p class="text-sm text-slate-600 italic"><%= customer.notes %></p>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order History -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="p-6 border-b border-slate-100">
+                    <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider">Orderhistorik</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200">
+                        <thead>
+                            <tr class="bg-slate-50/50">
+                                <th class="px-6 py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider">Ordernummer</th>
+                                <th class="px-6 py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider">Datum</th>
+                                <th class="px-6 py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-right text-[10px] font-bold text-slate-400 uppercase tracking-wider">Totalt</th>
+                                <th class="px-6 py-3 text-right text-[10px] font-bold text-slate-400 uppercase tracking-wider">Åtgärder</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 bg-white">
+                            <% if (orders.length === 0) { %>
+                                <tr>
+                                    <td colspan="5" class="px-6 py-12 text-center">
+                                        <p class="text-sm font-medium text-slate-500">Inga ordrar hittades för denna kund</p>
+                                    </td>
+                                </tr>
+                            <% } else { %>
+                                <% orders.forEach(order => { %>
+                                <tr class="hover:bg-slate-50/50 transition-colors group">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="text-sm font-bold text-slate-900 group-hover:text-sky-600 transition-colors"><%= order.order_number %></span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="text-sm text-slate-500"><%= order.order_date || '-' %></span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider <%= order.status === 'confirmed' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : order.status === 'draft' ? 'bg-amber-50 text-amber-700 border border-amber-100' : 'bg-slate-50 text-slate-700 border border-slate-100' %>">
+                                            <%= order.status %>
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right">
+                                        <span class="text-sm font-bold text-slate-900"><%= order.total_price_incl_moms || 0 %> kr</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right">
+                                        <a href="/orders/<%= order.id %>" 
+                                           class="p-2 text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-all"
+                                           title="Visa">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                        </a>
+                                    </td>
+                                </tr>
+                                <% }); %>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

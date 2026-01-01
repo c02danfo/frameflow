@@ -1,0 +1,25 @@
+# Local development Caddyfile
+# Requires hosts entries for:
+# - frameflow.test
+# - inventory.frameflow.test
+# - framing.frameflow.test
+
+{
+    # Generate a local CA + certs automatically
+    local_certs
+}
+
+frameflow.test {
+    tls internal
+    reverse_proxy frameflow-dashboard:3010
+}
+
+inventory.frameflow.test {
+    tls internal
+    reverse_proxy frameflow-inventory:3015
+}
+
+framing.frameflow.test {
+    tls internal
+    reverse_proxy frameflow-framing:3011
+}

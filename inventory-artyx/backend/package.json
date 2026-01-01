@@ -1,0 +1,29 @@
+{
+  "name": "inventory-artyx-backend",
+  "version": "0.1.0",
+  "description": "Backend för inventory.artyx.se - enkel Node/Express app",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon --watch src --exec node src/index.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "bwip-js": "^4.5.1",
+    "connect-pg-simple": "^9.0.1",
+    "csv-parse": "^6.1.0",
+    "dotenv": "^16.6.1",
+    "ejs": "^3.1.9",
+    "express": "^4.22.1",
+    "express-session": "^1.17.3",
+    "multer": "^1.4.5-lts.1",
+    "pg": "^8.11.0",
+    "qrcode": "^1.5.3",
+    "sharp": "^0.33.5"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  }
+}

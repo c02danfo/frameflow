@@ -1,0 +1,3 @@
+skicka.artyx.se {
+    reverse_proxy 192.168.0.192:3000
+}

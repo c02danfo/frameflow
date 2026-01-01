@@ -1,0 +1,263 @@
+version: '3.8'
+
+services:
+  # PostgreSQL for Auth Service
+  auth-db:
+    image: postgres:15-alpine
+    container_name: frameflow-auth-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: frameflow_auth
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: ${AUTH_DB_PASSWORD:-auth123}
+    volumes:
+      - auth-db-data:/var/lib/postgresql/data
+      - ./auth-service/backend/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - frameflow-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth_user -d frameflow_auth"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Auth Service
+  auth-service:
+    build:
+      context: .
+      dockerfile: auth-service/Dockerfile
+    container_name: frameflow-auth
+    restart: unless-stopped
+    environment:
+      PORT: 3005
+      AUTH_DB_HOST: auth-db
+      AUTH_DB_PORT: 5432
+      AUTH_DB_USER: auth_user
+      AUTH_DB_PASSWORD: ${AUTH_DB_PASSWORD:-auth123}
+      AUTH_DB_NAME: frameflow_auth
+      JWT_SECRET: ${JWT_SECRET}
+      SESSION_SECRET: ${SESSION_SECRET}
+      NODE_ENV: production
+    volumes:
+      - ./shared:/shared:ro
+      - ./design-system:/app/public/design-system:ro
+    ports:
+      - "3005:3005"
+    networks:
+      - frameflow-network
+    depends_on:
+      auth-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3005/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # PostgreSQL for Inventory
+  inventory-db:
+    image: postgres:15-alpine
+    container_name: frameflow-inventory-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: inventory_artyx
+      POSTGRES_USER: inventory_user
+      POSTGRES_PASSWORD: ${INVENTORY_DB_PASSWORD}
+    volumes:
+      - inventory-db-data:/var/lib/postgresql/data
+      - ./inventory-artyx/backend/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - frameflow-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U inventory_user -d inventory_artyx"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PostgreSQL for Framing
+  framing-db:
+    image: postgres:15-alpine
+    container_name: frameflow-framing-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: framing_app
+      POSTGRES_USER: inventory_user
+      POSTGRES_PASSWORD: ${FRAMING_DB_PASSWORD}
+    volumes:
+      - framing-db-data:/var/lib/postgresql/data
+      - ./framing-app/backend/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - frameflow-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U inventory_user -d framing_app"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Inventory Management System
+  inventory-app:
+    build: 
+      context: .
+      dockerfile: inventory-artyx/Dockerfile
+    container_name: frameflow-inventory
+    restart: unless-stopped
+    environment:
+      PORT: 3015
+      DB_HOST: inventory-db
+      DB_PORT: 5432
+      DB_USER: inventory_user
+      DB_PASSWORD: ${INVENTORY_DB_PASSWORD}
+      DB_NAME: inventory_artyx
+      AUTH_DB_HOST: auth-db
+      AUTH_DB_PORT: 5432
+      AUTH_DB_USER: auth_user
+      AUTH_DB_PASSWORD: ${AUTH_DB_PASSWORD:-auth123}
+      AUTH_DB_NAME: frameflow_auth
+      AUTH_SERVICE_URL: http://auth-service:3005
+      SESSION_SECRET: ${SESSION_SECRET}
+      JWT_SECRET: ${JWT_SECRET}
+      NODE_ENV: production
+      DOMAIN: ${DOMAIN:-YOUR_DOMAIN}
+    volumes:
+      - ./shared:/shared:ro
+      - ./design-system:/app/public/design-system:ro
+    ports:
+      - "3015:3015"
+    networks:
+      - frameflow-network
+    depends_on:
+      inventory-db:
+        condition: service_healthy
+      auth-db:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3015/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Framing/Order Management System
+  framing-app:
+    build:
+      context: .
+      dockerfile: framing-app/Dockerfile
+    container_name: frameflow-framing
+    restart: unless-stopped
+    environment:
+      PORT: 3011
+      DB_HOST: framing-db
+      DB_PORT: 5432
+      DB_NAME: framing_app
+      DB_USER: inventory_user
+      DB_PASSWORD: ${FRAMING_DB_PASSWORD}
+      INVENTORY_DB_HOST: inventory-db
+      INVENTORY_DB_PORT: 5432
+      INVENTORY_DB_NAME: inventory_artyx
+      INVENTORY_DB_USER: inventory_user
+      INVENTORY_DB_PASSWORD: ${INVENTORY_DB_PASSWORD}
+      AUTH_DB_HOST: auth-db
+      AUTH_DB_PORT: 5432
+      AUTH_DB_USER: auth_user
+      AUTH_DB_PASSWORD: ${AUTH_DB_PASSWORD:-auth123}
+      AUTH_DB_NAME: frameflow_auth
+      AUTH_SERVICE_URL: http://auth-service:3005
+      SESSION_SECRET: ${SESSION_SECRET}
+      JWT_SECRET: ${JWT_SECRET}
+      MOMS_PERCENTAGE: 25
+      DOMAIN: ${DOMAIN:-YOUR_DOMAIN}
+      NODE_ENV: production
+    volumes:
+      - ./shared:/shared:ro
+      - ./design-system:/app/public/design-system:ro
+    ports:
+      - "3011:3011"
+    networks:
+      - frameflow-network
+    depends_on:
+      framing-db:
+        condition: service_healthy
+      inventory-db:
+        condition: service_healthy
+      auth-db:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3011/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Dashboard App
+  dashboard-app:
+    build:
+      context: .
+      dockerfile: dashboard-app/Dockerfile
+    container_name: frameflow-dashboard
+    restart: unless-stopped
+    environment:
+      PORT: 3010
+      AUTH_DB_HOST: auth-db
+      AUTH_DB_PORT: 5432
+      AUTH_DB_USER: auth_user
+      AUTH_DB_PASSWORD: ${AUTH_DB_PASSWORD:-auth123}
+      AUTH_DB_NAME: frameflow_auth
+      AUTH_SERVICE_URL: http://auth-service:3005
+      SESSION_SECRET: ${SESSION_SECRET}
+      JWT_SECRET: ${JWT_SECRET}
+      NODE_ENV: production
+      DOMAIN: ${DOMAIN:-YOUR_DOMAIN}
+    volumes:
+      - ./shared:/shared:ro
+      - ./design-system:/app/public/design-system:ro
+    ports:
+      - "3010:3010"
+    networks:
+      - frameflow-network
+    depends_on:
+      auth-db:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3010/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Caddy Reverse Proxy with HTTPS
+  caddy:
+    image: caddy:2-alpine
+    container_name: frameflow-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"  # HTTP/3
+    volumes:
+      - ./caddy/Caddyfile.production:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - frameflow-network
+    depends_on:
+      - dashboard-app
+      - inventory-app
+      - framing-app
+
+networks:
+  frameflow-network:
+    driver: bridge
+
+volumes:
+  auth-db-data:
+  inventory-db-data:
+  framing-db-data:
+  caddy_data:
+  caddy_config:

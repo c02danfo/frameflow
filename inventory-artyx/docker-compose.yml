@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  inventory-db:
+    image: postgres:15-alpine
+    container_name: inventory-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: inventory_artyx
+      POSTGRES_USER: inventory_user
+      POSTGRES_PASSWORD: inventory_pass
+    ports:
+      - "15432:5432"
+    volumes:
+      - inventory-db-data:/var/lib/postgresql/data
+      - ./backend/db/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    networks:
+      - inventory-network
+
+  inventory-app:
+    build: .
+    container_name: inventory-app
+    restart: unless-stopped
+    environment:
+      PORT: 3000
+      DB_HOST: inventory-db
+      DB_PORT: 5432
+      DB_USER: inventory_user
+      DB_PASSWORD: inventory_pass
+      DB_NAME: inventory_artyx
+    ports:
+      - "3000:3000"
+    depends_on:
+      - inventory-db
+    networks:
+      - inventory-network
+
+networks:
+  inventory-network:
+    driver: bridge
+
+volumes:
+  inventory-db-data:

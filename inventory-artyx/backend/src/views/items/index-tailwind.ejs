@@ -1,0 +1,364 @@
+<div class="bg-gray-50 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+            <div>
+                <h2 class="text-3xl font-bold text-gray-900">Artiklar</h2>
+                <p class="text-sm text-gray-600 mt-1">Hantera lagersaldo och prissättning</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <a href="/items/export.csv" class="inline-flex items-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg shadow-sm transition-colors">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    Exportera CSV
+                </a>
+                <button onclick="document.getElementById('importModal').classList.remove('hidden')" class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow-sm transition-colors">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                    </svg>
+                    Importera CSV
+                </button>
+                <a href="/items/new" class="inline-flex items-center px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-lg shadow-sm transition-colors">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Ny artikel
+                </a>
+            </div>
+        </div>
+
+        <!-- Import Modal -->
+        <div id="importModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Importera artiklar från CSV</h3>
+                    <button onclick="document.getElementById('importModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                <form action="/items/import" method="POST" enctype="multipart/form-data">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Välj CSV-fil</label>
+                        <input type="file" name="file" accept=".csv" required 
+                               class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100">
+                        <p class="text-xs text-gray-500 mt-2">Importerar baserat på streckkod. Uppdaterar befintliga artiklar.</p>
+                    </div>
+                    <div class="flex justify-end gap-3">
+                        <button type="button" onclick="document.getElementById('importModal').classList.add('hidden')" 
+                                class="px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors">
+                            Avbryt
+                        </button>
+                        <button type="submit" 
+                                class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow-sm transition-colors">
+                            Importera
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Search and filters -->
+        <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Sök</label>
+                    <input type="text" id="searchInput" placeholder="SKU, namn, leverantör..." 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
+                    <select id="categoryFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                        <option value="">Alla kategorier</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Lagerstatus</label>
+                    <select id="stockFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                        <option value="">Alla</option>
+                        <option value="in-stock">I lager</option>
+                        <option value="out-of-stock">Slut i lager</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Visa kolumner</label>
+                    <div class="relative">
+                        <button type="button" onclick="document.getElementById('columnMenu').classList.toggle('hidden')" 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg text-left hover:bg-gray-50 flex items-center justify-between">
+                            <span class="text-sm text-gray-700">Välj kolumner</span>
+                            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+                        <div id="columnMenu" class="hidden absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg p-3">
+                            <label class="flex items-center gap-2 py-1 hover:bg-gray-50 rounded px-2 cursor-pointer">
+                                <input type="checkbox" checked onchange="toggleColumn('col-image')" class="rounded text-sky-600">
+                                <span class="text-sm">Bild</span>
+                            </label>
+                            <label class="flex items-center gap-2 py-1 hover:bg-gray-50 rounded px-2 cursor-pointer">
+                                <input type="checkbox" checked onchange="toggleColumn('col-id')" class="rounded text-sky-600">
+                                <span class="text-sm">ID</span>
+                            </label>
+                            <label class="flex items-center gap-2 py-1 hover:bg-gray-50 rounded px-2 cursor-pointer">
+                                <input type="checkbox" checked onchange="toggleColumn('col-sku')" class="rounded text-sky-600">
+                                <span class="text-sm">SKU</span>
+                            </label>
+                            <label class="flex items-center gap-2 py-1 hover:bg-gray-50 rounded px-2 cursor-pointer">
+                                <input type="checkbox" checked onchange="toggleColumn('col-category')" class="rounded text-sky-600">
+                                <span class="text-sm">Kategori</span>
+                            </label>
+                            <label class="flex items-center gap-2 py-1 hover:bg-gray-50 rounded px-2 cursor-pointer">
+                                <input type="checkbox" checked onchange="toggleColumn('col-supplier')" class="rounded text-sky-600">
+                                <span class="text-sm">Leverantör</span>
+                            </label>
+                            <label class="flex items-center gap-2 py-1 hover:bg-gray-50 rounded px-2 cursor-pointer">
+                                <input type="checkbox" checked onchange="toggleColumn('col-purchase')" class="rounded text-sky-600">
+                                <span class="text-sm">Inköpspris</span>
+                            </label>
+                            <label class="flex items-center gap-2 py-1 hover:bg-gray-50 rounded px-2 cursor-pointer">
+                                <input type="checkbox" checked onchange="toggleColumn('col-sales')" class="rounded text-sky-600">
+                                <span class="text-sm">Försäljningspris</span>
+                            </label>
+                            <label class="flex items-center gap-2 py-1 hover:bg-gray-50 rounded px-2 cursor-pointer">
+                                <input type="checkbox" checked onchange="toggleColumn('col-pricegroup')" class="rounded text-sky-600">
+                                <span class="text-sm">Prisgrupp</span>
+                            </label>
+                            <label class="flex items-center gap-2 py-1 hover:bg-gray-50 rounded px-2 cursor-pointer">
+                                <input type="checkbox" checked onchange="toggleColumn('col-stock')" class="rounded text-sky-600">
+                                <span class="text-sm">Lager</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function toggleColumn(columnClass) {
+                const elements = document.querySelectorAll('.' + columnClass);
+                elements.forEach(el => el.classList.toggle('hidden'));
+            }
+            
+            // Close column menu when clicking outside
+            document.addEventListener('click', function(event) {
+                const menu = document.getElementById('columnMenu');
+                const button = event.target.closest('button');
+                if (menu && !menu.contains(event.target) && (!button || !button.onclick)) {
+                    menu.classList.add('hidden');
+                }
+            });
+        </script>
+
+        <!-- Desktop table view -->
+        <div class="hidden lg:block bg-white rounded-lg shadow-sm overflow-hidden">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider col-image">Bild</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider col-id">ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider col-sku">SKU</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider col-category">Kategori</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Namn</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider col-supplier">Leverantör</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider col-purchase">Inköpspris</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider col-sales">Försäljningspris</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider col-pricegroup">Prisgrupp</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider col-stock">Lager</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Åtgärder</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <% if (!items || items.length === 0) { %>
+                        <tr>
+                            <td colspan="11" class="px-6 py-12 text-center">
+                                <div class="flex flex-col items-center">
+                                    <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                    </svg>
+                                    <p class="text-gray-500">Inga artiklar hittades</p>
+                                </div>
+                            </td>
+                        </tr>
+                    <% } else { %>
+                        <% items.forEach(item => { %>
+                        <tr class="hover:bg-gray-50 cursor-pointer" onclick="window.location='/items/<%= item.id %>/view'">
+                            <td class="px-6 py-4 whitespace-nowrap col-image">
+                                <% if (item.primary_image) { %>
+                                    <img src="/items/<%= item.id %>/image/<%= item.primary_image.replace('_original', '_thumb').replace(/\.(jpg|jpeg|png|webp)$/i, '.jpg') %>" 
+                                         alt="<%= item.name %>" 
+                                         class="w-12 h-12 object-cover rounded-lg">
+                                <% } else { %>
+                                    <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                    </div>
+                                <% } %>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap col-id">
+                                <span class="text-sm font-medium text-gray-900"><%= item.id %></span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap col-sku">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-md bg-gray-900 text-white text-xs font-mono font-semibold"><%= item.sku %></span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap col-category">
+                                <% if (item.category) { %>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800 text-xs font-medium"><%= item.category %></span>
+                                <% } else { %>
+                                    <span class="text-gray-400">-</span>
+                                <% } %>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="font-medium text-gray-900"><%= item.name %></div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 col-supplier">
+                                <%= item.supplier || '-' %>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900 col-purchase">
+                                <%= item.purchase_price ? parseFloat(item.purchase_price).toFixed(2) + ' kr' : '-' %>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-semibold text-emerald-600 col-sales">
+                                <%= item.sales_price ? parseFloat(item.sales_price).toFixed(2) + ' kr' : '-' %>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap col-pricegroup">
+                                <% if (item.price_group) { %>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-xs font-medium"><%= item.price_group %></span>
+                                <% } else { %>
+                                    <span class="text-gray-400">-</span>
+                                <% } %>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center col-stock">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold <%= (item.quantity || 0) > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800' %>">
+                                    <%= item.quantity || 0 %> st
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right" onclick="event.stopPropagation()">
+                                <div class="flex items-center justify-end gap-2">
+                                    <a href="/items/<%= item.id %>/view" 
+                                       class="p-2 text-gray-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors"
+                                       title="Visa">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
+                                    </a>
+                                    <a href="/items/<%= item.id %>/edit" 
+                                       class="p-2 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                                       title="Redigera">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-5M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                                        </svg>
+                                    </a>
+                                    <form method="POST" action="/items/<%= item.id %>/delete" style="display:inline" onsubmit="return confirm('Är du säker på att du vill ta bort denna artikel?');">
+                                        <button type="submit" 
+                                                class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                title="Ta bort">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Mobile card view -->
+        <div class="lg:hidden space-y-4">
+            <% if (!items || items.length === 0) { %>
+                <div class="bg-white rounded-lg shadow-sm p-8 text-center">
+                    <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                    </svg>
+                    <p class="text-gray-500">Inga artiklar hittades</p>
+                </div>
+            <% } else { %>
+                <% items.forEach(item => { %>
+                <div class="bg-white rounded-lg shadow-sm p-4 cursor-pointer hover:shadow-md transition-shadow" 
+                     onclick="window.location='/items/<%= item.id %>/view'">
+                    <div class="flex gap-4">
+                        <!-- Image -->
+                        <div class="flex-shrink-0">
+                            <% if (item.primary_image) { %>
+                                <img src="/items/<%= item.id %>/image/<%= item.primary_image.replace('_original', '_thumb').replace(/\.(jpg|jpeg|png|webp)$/i, '.jpg') %>" 
+                                     alt="<%= item.name %>" 
+                                     class="w-20 h-20 object-cover rounded-lg">
+                            <% } else { %>
+                                <div class="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center">
+                                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                    </svg>
+                                </div>
+                            <% } %>
+                        </div>
+                        
+                        <!-- Content -->
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-start justify-between mb-2">
+                                <div class="flex-1">
+                                    <h3 class="font-semibold text-gray-900 truncate"><%= item.name %></h3>
+                                    <div class="flex items-center gap-2 mt-1">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded bg-gray-900 text-white text-xs font-mono font-semibold"><%= item.sku %></span>
+                                        <% if (item.category) { %>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 text-xs"><%= item.category %></span>
+                                        <% } %>
+                                    </div>
+                                </div>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold <%= (item.quantity || 0) > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800' %>">
+                                    <%= item.quantity || 0 %> st
+                                </span>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-2 text-sm mt-3">
+                                <div>
+                                    <span class="text-gray-500">Inköp:</span>
+                                    <span class="font-medium text-gray-900 ml-1"><%= item.purchase_price ? parseFloat(item.purchase_price).toFixed(2) + ' kr' : '-' %></span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500">Försäljning:</span>
+                                    <span class="font-semibold text-emerald-600 ml-1"><%= item.sales_price ? parseFloat(item.sales_price).toFixed(2) + ' kr' : '-' %></span>
+                                </div>
+                                <% if (item.supplier) { %>
+                                <div class="col-span-2">
+                                    <span class="text-gray-500">Leverantör:</span>
+                                    <span class="text-gray-900 ml-1"><%= item.supplier %></span>
+                                </div>
+                                <% } %>
+                                <% if (item.price_group) { %>
+                                <div class="col-span-2">
+                                    <span class="text-xs text-amber-600 font-medium">Prisgrupp: <%= item.price_group %></span>
+                                </div>
+                                <% } %>
+                            </div>
+                            
+                            <div class="flex gap-2 mt-3 pt-3 border-t border-gray-100" onclick="event.stopPropagation()">
+                                <a href="/items/<%= item.id %>/view" 
+                                   class="flex-1 inline-flex items-center justify-center px-3 py-2 bg-sky-50 text-sky-700 text-sm font-medium rounded-lg hover:bg-sky-100 transition-colors">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    </svg>
+                                    Visa
+                                </a>
+                                <a href="/items/<%= item.id %>/edit" 
+                                   class="flex-1 inline-flex items-center justify-center px-3 py-2 bg-amber-50 text-amber-700 text-sm font-medium rounded-lg hover:bg-amber-100 transition-colors">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-5M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                                    </svg>
+                                    Redigera
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <% }); %>
+            <% } %>
+        </div>
+    </div>
+</div>

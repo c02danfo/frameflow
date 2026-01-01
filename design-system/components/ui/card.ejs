@@ -1,0 +1,22 @@
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden <%= locals.classes || '' %>">
+    <% if (locals.title || locals.headerRight) { %>
+        <div class="px-6 py-4 border-bottom border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <% if (locals.title) { %>
+                <h3 class="text-lg font-bold text-slate-800"><%= title %></h3>
+            <% } %>
+            <% if (locals.headerRight) { %>
+                <div><%- headerRight %></div>
+            <% } %>
+        </div>
+    <% } %>
+    
+    <div class="<%= locals.noPadding ? '' : 'p-6' %>">
+        <%- body %>
+    </div>
+    
+    <% if (locals.footer) { %>
+        <div class="px-6 py-4 bg-slate-50 border-top border-slate-100">
+            <%- footer %>
+        </div>
+    <% } %>
+</div>

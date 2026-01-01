@@ -1,0 +1,253 @@
+<div class="max-w-screen-lg mx-auto">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Företagsinformation</h2>
+        <a href="/orders" class="inline-flex items-center px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded-lg transition-colors">
+            ← Tillbaka
+        </a>
+    </div>
+
+    <% if (locals.error) { %>
+    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm font-medium">
+        <%= error %>
+    </div>
+    <% } %>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <form method="POST" action="/company-data" enctype="multipart/form-data" class="space-y-8">
+            <!-- Basic Info -->
+            <div>
+                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Grundläggande information</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="display_name" class="block text-sm font-medium text-slate-700 mb-2">Visningsnamn</label>
+                        <input type="text" id="display_name" name="display_name" value="<%= company?.display_name || '' %>" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label for="legal_name" class="block text-sm font-medium text-slate-700 mb-2">Juridiskt namn</label>
+                        <input type="text" id="legal_name" name="legal_name" value="<%= company?.legal_name || '' %>" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-slate-700 mb-2">E-post</label>
+                        <input type="email" id="email" name="email" value="<%= company?.email || '' %>" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label for="phone" class="block text-sm font-medium text-slate-700 mb-2">Telefon</label>
+                        <input type="text" id="phone" name="phone" value="<%= company?.phone || '' %>" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="website" class="block text-sm font-medium text-slate-700 mb-2">Webbplats</label>
+                        <input type="text" id="website" name="website" value="<%= company?.website || '' %>" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Address -->
+            <div class="pt-8 border-t border-slate-100">
+                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Adress</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2">
+                        <label for="address_line1" class="block text-sm font-medium text-slate-700 mb-2">Adressrad 1</label>
+                        <input type="text" id="address_line1" name="address_line1" value="<%= company?.address_line1 || '' %>" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="address_line2" class="block text-sm font-medium text-slate-700 mb-2">Adressrad 2</label>
+                        <input type="text" id="address_line2" name="address_line2" value="<%= company?.address_line2 || '' %>" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label for="postal_code" class="block text-sm font-medium text-slate-700 mb-2">Postnummer</label>
+                        <input type="text" id="postal_code" name="postal_code" value="<%= company?.postal_code || '' %>" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label for="city" class="block text-sm font-medium text-slate-700 mb-2">Ort</label>
+                        <input type="text" id="city" name="city" value="<%= company?.city || '' %>" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label for="region" class="block text-sm font-medium text-slate-700 mb-2">Region / Län</label>
+                        <input type="text" id="region" name="region" value="<%= company?.region || '' %>" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label for="country" class="block text-sm font-medium text-slate-700 mb-2">Land</label>
+                        <input type="text" id="country" name="country" value="<%= company?.country || '' %>" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Legal & Tax -->
+            <div class="pt-8 border-t border-slate-100">
+                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Juridik & Skatt</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="tax_id" class="block text-sm font-medium text-slate-700 mb-2">Momsregistreringsnummer</label>
+                        <input type="text" id="tax_id" name="tax_id" value="<%= company?.tax_id || '' %>" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label for="company_id" class="block text-sm font-medium text-slate-700 mb-2">Organisationsnummer</label>
+                        <input type="text" id="company_id" name="company_id" value="<%= company?.company_id || '' %>" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label for="vat_rate_percentage" class="block text-sm font-medium text-slate-700 mb-2">Momssats (%)</label>
+                        <input type="number" step="0.01" id="vat_rate_percentage" name="vat_rate_percentage" value="<%= company?.vat_rate_percentage ?? 25 %>" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Localization -->
+            <div class="pt-8 border-t border-slate-100">
+                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Regionala inställningar</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label for="locale" class="block text-sm font-medium text-slate-700 mb-2">Språk/Region</label>
+                        <select id="locale" name="locale" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all">
+                            <option value="" <%= !company?.locale ? 'selected' : '' %>>Auto (webbläsare)</option>
+                            <option value="en-US" <%= company?.locale === 'en-US' ? 'selected' : '' %>>English (US) — en-US</option>
+                            <option value="en-GB" <%= company?.locale === 'en-GB' ? 'selected' : '' %>>English (UK) — en-GB</option>
+                            <option value="sv-SE" <%= company?.locale === 'sv-SE' ? 'selected' : '' %>>Svenska (Sverige) — sv-SE</option>
+                            <option value="de-DE" <%= company?.locale === 'de-DE' ? 'selected' : '' %>>Deutsch (Deutschland) — de-DE</option>
+                        </select>
+                        <div class="mt-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-tight text-slate-400">
+                            <span id="detected-locale"></span>
+                            <button type="button" id="use-detected-locale" class="text-sky-600 hover:text-sky-700">Använd detekterad</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="currency" class="block text-sm font-medium text-slate-700 mb-2">Valuta</label>
+                        <select id="currency" name="currency" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all">
+                            <option value="" <%= !company?.currency ? 'selected' : '' %>>Auto</option>
+                            <option value="SEK" <%= company?.currency === 'SEK' ? 'selected' : '' %>>SEK</option>
+                            <option value="EUR" <%= company?.currency === 'EUR' ? 'selected' : '' %>>EUR</option>
+                            <option value="USD" <%= company?.currency === 'USD' ? 'selected' : '' %>>USD</option>
+                            <option value="GBP" <%= company?.currency === 'GBP' ? 'selected' : '' %>>GBP</option>
+                        </select>
+                        <div class="mt-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-tight text-slate-400">
+                            <span id="detected-currency"></span>
+                            <button type="button" id="use-detected-currency" class="text-sky-600 hover:text-sky-700">Använd förslag</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="timezone" class="block text-sm font-medium text-slate-700 mb-2">Tidszon</label>
+                        <select id="timezone" name="timezone" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all">
+                            <option value="" <%= !company?.timezone ? 'selected' : '' %>>Auto (webbläsare)</option>
+                            <% if (company?.timezone) { %>
+                                <option value="<%= company.timezone %>" selected><%= company.timezone %></option>
+                            <% } %>
+                        </select>
+                        <div class="mt-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-tight text-slate-400">
+                            <span id="detected-timezone"></span>
+                            <button type="button" id="use-detected-timezone" class="text-sky-600 hover:text-sky-700">Använd detekterad</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logo -->
+            <div class="pt-8 border-t border-slate-100">
+                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Logotyp</h3>
+                <div class="flex items-start gap-8">
+                    <div class="flex-1">
+                        <input type="file" name="logo" accept="image/*" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100 cursor-pointer">
+                        <p class="mt-2 text-xs text-slate-400 italic">PNG, JPG, WebP eller GIF.</p>
+                    </div>
+                    <% if (company?.logo_path) { %>
+                        <div class="shrink-0 p-2 bg-slate-50 rounded-xl border border-slate-100">
+                            <img src="<%= company.logo_path %>" class="max-h-16">
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-8 border-t border-slate-100">
+                <a href="/orders" class="inline-flex items-center px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded-lg transition-colors">
+                    Avbryt
+                </a>
+                <button type="submit" class="inline-flex items-center px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
+                    Spara ändringar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+  (function () {
+    function guessCurrencyFromLocale(locale) {
+      const l = String(locale || '').toLowerCase();
+      if (l.startsWith('sv')) return 'SEK';
+      if (l.startsWith('en-gb')) return 'GBP';
+      if (l.startsWith('en-us')) return 'USD';
+      if (l.startsWith('da')) return 'DKK';
+      if (l.startsWith('nb') || l.startsWith('nn') || l.startsWith('no')) return 'NOK';
+      if (l.startsWith('de') || l.startsWith('fr') || l.startsWith('es') || l.startsWith('it') || l.startsWith('nl')) return 'EUR';
+      return '';
+    }
+
+    function setText(id, label, value) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = value ? `${label}: ${value}` : '';
+    }
+
+    try {
+      const localeSelect = document.getElementById('locale');
+      const currencySelect = document.getElementById('currency');
+      const tzSelect = document.getElementById('timezone');
+
+      const detectedLocale = navigator.language || '';
+      const detectedTz = (Intl.DateTimeFormat && Intl.DateTimeFormat().resolvedOptions().timeZone) || '';
+      const suggestedCurrency = guessCurrencyFromLocale(detectedLocale);
+
+      setText('detected-locale', 'Detekterad', detectedLocale);
+      setText('detected-timezone', 'Detekterad', detectedTz);
+      setText('detected-currency', 'Förslag', suggestedCurrency);
+
+      if (tzSelect && Intl.supportedValuesOf) {
+        const zones = Intl.supportedValuesOf('timeZone') || [];
+        const existingValue = tzSelect.value;
+        while (tzSelect.options.length > 1) tzSelect.remove(1);
+        zones.forEach((z) => {
+          const opt = document.createElement('option');
+          opt.value = z;
+          opt.textContent = z;
+          tzSelect.appendChild(opt);
+        });
+        if (existingValue) tzSelect.value = existingValue;
+        else if (detectedTz) tzSelect.value = detectedTz;
+      }
+
+      document.getElementById('use-detected-locale')?.addEventListener('click', () => {
+        if (!detectedLocale) return;
+        if (!Array.from(localeSelect.options).some(o => o.value === detectedLocale)) {
+          const opt = document.createElement('option');
+          opt.value = detectedLocale;
+          opt.textContent = `Detekterad — ${detectedLocale}`;
+          localeSelect.appendChild(opt);
+        }
+        localeSelect.value = detectedLocale;
+      });
+
+      document.getElementById('use-detected-timezone')?.addEventListener('click', () => {
+        if (!detectedTz) return;
+        if (!Array.from(tzSelect.options).some(o => o.value === detectedTz)) {
+          const opt = document.createElement('option');
+          opt.value = detectedTz;
+          opt.textContent = `Detekterad — ${detectedTz}`;
+          tzSelect.appendChild(opt);
+        }
+        tzSelect.value = detectedTz;
+      });
+
+      document.getElementById('use-detected-currency')?.addEventListener('click', () => {
+        if (!suggestedCurrency) return;
+        if (!Array.from(currencySelect.options).some(o => o.value === suggestedCurrency)) {
+          const opt = document.createElement('option');
+          opt.value = suggestedCurrency;
+          opt.textContent = `Förslag — ${suggestedCurrency}`;
+          currencySelect.appendChild(opt);
+        }
+        currencySelect.value = suggestedCurrency;
+      });
+    } catch (_e) {}
+  })();
+</script>

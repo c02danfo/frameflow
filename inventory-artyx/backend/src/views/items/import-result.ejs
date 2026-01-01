@@ -1,0 +1,53 @@
+<div class="max-w-5xl mx-auto">
+  <div class="flex items-center justify-between mb-4">
+    <h1 class="text-xl font-semibold">Importresultat</h1>
+    <a href="/items" class="text-blue-600 hover:underline text-sm">Tillbaka till Items</a>
+  </div>
+
+  <div class="bg-white rounded border border-gray-200 p-4 text-sm">
+    <div class="grid grid-cols-2 gap-2">
+      <div><span class="text-gray-600">Rader i filen:</span> <span class="font-medium"><%= report.total %></span></div>
+      <div><span class="text-gray-600">Sync mode:</span> <span class="font-medium"><%= report.syncMode ? 'Ja' : 'Nej (patch)' %></span></div>
+      <div><span class="text-gray-600">Skapade:</span> <span class="font-medium"><%= report.created %></span></div>
+      <div><span class="text-gray-600">Uppdaterade:</span> <span class="font-medium"><%= report.updated %></span></div>
+      <div><span class="text-gray-600">Fel:</span> <span class="font-medium"><%= report.errors.length %></span></div>
+      <div><span class="text-gray-600">Clear-token:</span> <span class="font-medium"><%= report.clearToken %></span></div>
+    </div>
+  </div>
+
+  <% if (report.errors.length) { %>
+    <div class="mt-4">
+      <h2 class="text-sm font-semibold mb-2">Felrader</h2>
+      <div class="overflow-auto max-h-[60vh] bg-white rounded border border-gray-200">
+        <table class="min-w-full text-xs">
+          <thead class="sticky top-0 bg-gray-50 border-b border-gray-200">
+            <tr>
+              <th class="text-left px-3 py-2">Rad</th>
+              <th class="text-left px-3 py-2">Barcode</th>
+              <th class="text-left px-3 py-2">Fel</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% report.errors.forEach((e) => { %>
+              <tr class="border-b border-gray-100">
+                <td class="px-3 py-2"><%= e.row %></td>
+                <td class="px-3 py-2"><%= e.barcode %></td>
+                <td class="px-3 py-2"><%= e.message %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% } %>
+
+  <div class="mt-6 text-xs text-gray-600">
+    <div class="font-semibold mb-1">Noteringar</div>
+    <ul class="list-disc ml-5 space-y-1">
+      <li>Nya rader matchas på <span class="font-mono">barcode</span>; <span class="font-mono">id</span> och <span class="font-mono">sku</span> ska inte skickas (skapas i databasen).</li>
+      <li>I patch-läge uppdateras bara kolumner som finns i CSV och har värde; tomma värden ignoreras.</li>
+      <li>I sync-läge (<span class="font-mono">sync=1</span>) kommer tomma värden i CSV att rensa fält (sättas till NULL).</li>
+      <li>För att explicit rensa ett fält i patch-läge kan du sätta värdet till <span class="font-mono"><%= report.clearToken %></span>.</li>
+    </ul>
+  </div>
+</div>

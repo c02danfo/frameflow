@@ -1,0 +1,58 @@
+<div>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Price Groups</h2>
+    <a class="btn btn-primary" href="/price-groups/new">
+      <i class="bi bi-plus-circle me-2"></i>New Price Group
+    </a>
+  </div>
+
+  <% if (!priceGroups || priceGroups.length === 0) { %>
+    <div class="alert alert-info" role="alert">
+      <i class="bi bi-info-circle me-2"></i>No price groups found.
+    </div>
+  <% } else { %>
+    <div class="card">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover table-striped mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Markup Percentage</th>
+                <th>Description</th>
+                <th>Example Calculation</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% priceGroups.forEach(function(pg){ %>
+                <tr>
+                  <td><%= pg.id %></td>
+                  <td><span class="badge bg-primary"><%= pg.name %></span></td>
+                  <td><strong><%= pg.markup_percentage %>%</strong></td>
+                  <td><%= pg.description || '-' %></td>
+                  <td>
+                    <small class="text-muted">
+                      Purchase: 100 → Sales: <%= (100 * pg.markup_percentage / 100).toFixed(2) %>
+                    </small>
+                  </td>
+                  <td>
+                    <a href="/price-groups/<%= pg.id %>/edit" class="btn btn-sm btn-outline-primary me-1" title="Edit">
+                      <i class="bi bi-pencil"></i>
+                    </a>
+                    <form method="POST" action="/price-groups/<%= pg.id %>/delete" style="display:inline" onsubmit="return confirm('Are you sure you want to delete this price group?');">
+                      <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  <% } %>
+</div>

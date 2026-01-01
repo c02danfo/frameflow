@@ -1,0 +1,237 @@
+<div class="bg-gray-50 min-h-screen">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="text-3xl font-bold text-gray-900">Ny artikel</h2>
+                <p class="text-sm text-gray-600 mt-1">Skapa en ny artikel i lagersystemet</p>
+            </div>
+            <a href="/items" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors shadow-sm">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Tillbaka
+            </a>
+        </div>
+
+        <!-- Form -->
+        <form action="/items" method="POST" enctype="multipart/form-data" class="space-y-6">
+            <!-- Grundinformation -->
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-3 border-b border-gray-200">Grundinformation</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- SKU (auto-generated) -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">SKU</label>
+                        <input type="text" value="Genereras automatiskt" disabled 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500">
+                        <p class="text-xs text-gray-500 mt-1">Genereras automatiskt vid sparning</p>
+                    </div>
+
+                    <!-- Barcode (auto-generated) -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Streckkod</label>
+                        <input type="text" value="Genereras automatiskt" disabled 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500">
+                        <p class="text-xs text-gray-500 mt-1">Code128 streckkod skapas automatiskt</p>
+                    </div>
+
+                    <!-- Name -->
+                    <div class="lg:col-span-1">
+                        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
+                            Namn <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" id="name" name="name" required 
+                               placeholder="T.ex. Ram 50x70cm guld" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                    </div>
+
+                    <!-- Category -->
+                    <div>
+                        <label for="category" class="block text-sm font-medium text-gray-700 mb-1">
+                            Kategori <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" id="category" name="category" required list="categoryList" 
+                               placeholder="Välj eller skriv" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                        <datalist id="categoryList">
+                            <% if (locals.categories && categories.length > 0) { %>
+                                <% categories.forEach(cat => { %>
+                                    <option value="<%= cat %>"></option>
+                                <% }); %>
+                            <% } %>
+                        </datalist>
+                        <p class="text-xs text-gray-500 mt-1">Krävs för SKU-generering</p>
+                    </div>
+
+                    <!-- Supplier -->
+                    <div>
+                        <label for="supplier" class="block text-sm font-medium text-gray-700 mb-1">Leverantör</label>
+                        <input type="text" id="supplier" name="supplier" list="supplierList" 
+                               placeholder="Välj eller skriv" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                        <datalist id="supplierList">
+                            <% if (locals.suppliers && suppliers.length > 0) { %>
+                                <% suppliers.forEach(s => { %>
+                                    <option value="<%= s %>"></option>
+                                <% }); %>
+                            <% } %>
+                        </datalist>
+                    </div>
+
+                    <!-- Supplier Item Number -->
+                    <div>
+                        <label for="supplier_item_number" class="block text-sm font-medium text-gray-700 mb-1">Leverantörens artikelnr</label>
+                        <input type="text" id="supplier_item_number" name="supplier_item_number" 
+                               placeholder="T.ex. SUP-12345" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                    </div>
+
+                    <!-- Color -->
+                    <div>
+                        <label for="color" class="block text-sm font-medium text-gray-700 mb-1">Färg</label>
+                        <input type="text" id="color" name="color" 
+                               placeholder="T.ex. Vit, Svart" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                    </div>
+
+                    <!-- Stock Unit -->
+                    <div>
+                        <label for="stock_unit" class="block text-sm font-medium text-gray-700 mb-1">Lagerenhet</label>
+                        <input type="text" id="stock_unit" name="stock_unit" 
+                               placeholder="T.ex. st, m, kg" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                    </div>
+
+                    <!-- Quantity -->
+                    <div>
+                        <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">Lagersaldo</label>
+                        <input type="number" id="quantity" name="quantity" value="0" min="0" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                    </div>
+
+                    <!-- Description (full width) -->
+                    <div class="lg:col-span-3">
+                        <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Beskrivning</label>
+                        <textarea id="description" name="description" rows="3" 
+                                  placeholder="Beskriv artikeln..." 
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dimensioner -->
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-3 border-b border-gray-200">Dimensioner (valfritt)</h3>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    <!-- Width -->
+                    <div>
+                        <label for="dim_width" class="block text-sm font-medium text-gray-700 mb-1">Bredd</label>
+                        <input type="number" step="0.01" id="dim_width" name="dim_width" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                    </div>
+
+                    <!-- Height -->
+                    <div>
+                        <label for="dim_height" class="block text-sm font-medium text-gray-700 mb-1">Höjd</label>
+                        <input type="number" step="0.01" id="dim_height" name="dim_height" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                    </div>
+
+                    <!-- Length -->
+                    <div>
+                        <label for="dim_length" class="block text-sm font-medium text-gray-700 mb-1">Längd</label>
+                        <input type="number" step="0.01" id="dim_length" name="dim_length" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                    </div>
+
+                    <!-- Thickness -->
+                    <div>
+                        <label for="dim_thickness" class="block text-sm font-medium text-gray-700 mb-1">Tjocklek</label>
+                        <input type="number" step="0.01" id="dim_thickness" name="dim_thickness" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                    </div>
+
+                    <!-- Unit -->
+                    <div>
+                        <label for="dim_unit" class="block text-sm font-medium text-gray-700 mb-1">Enhet</label>
+                        <select id="dim_unit" name="dim_unit" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:r</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label for="width_mm" class="block text-sm font-medium text-gray-700 mb-1">Bredd (mm)</label>
+                        <input type="number" id="width_mm" name="width_mm" step="0.01" 
+                               placeholder="0" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                    </div>
+
+                    <div>
+                        <label for="height_mm" class="block text-sm font-medium text-gray-700 mb-1">Höjd (mm)</label>
+                        <input type="number" id="height_mm" name="height_mm" step="0.01" 
+                               placeholder="0" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                    </div>
+Inköpspris (kr)</label>
+                        <input type="number" id="purchase_price" name="purchase_price" step="0.01" 
+                               placeholder="0.00" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                    </div>
+
+                    <!-- Price Group -->
+                    <div>
+                        <label for="price_group" class="block text-sm font-medium text-gray-700 mb-1">Prisgrupp</label>
+                        <select id="price_group" name="price_group" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent bg-white">
+                            <option value="">Ingen prisgrupp</option>
+                            <% if (locals.priceGroups && priceGroups.length > 0) { %>
+                                <% priceGroups.forEach(pg => { %>
+                                    <option value="<%= pg.name %>"><%= pg.name %> (<%= pg.markup_percentage %>% påslag)</option>
+                                <% }); %>
+                            <% } %>
+                        </select>
+                        <p class="text-xs text-gray-500 mt-1">Försäljningspris beräknas automatiskt från påslagsgrupp</p>
+                    </div>
+
+                    <!-- Sales Price -->
+                    <div>
+                        <label for="sales_price" class="block text-sm font-medium text-gray-700 mb-1">Försäljningspris (kr)</label>
+                        <input type="number" id="sales_price" name="sales_price" step="0.01" 
+                               placeholder="Beräknas automatiskt" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                        <p class="text-xs text-gray-500 mt-1">Lämna tom för automatisk beräkning</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bilder -->
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-3 border-b border-gray-200">Bilder</h3>
+                
+                <div>
+                    <label for="images" class="block text-sm font-medium text-gray-700 mb-2">Ladda upp bilder</label>
+                    <input type="file" id="images" name="images" multiple accept="image/*" 
+                           class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100">
+                    <p class="text-xs text-gray-500 mt-2">Du kan välja flera bilder. Den första bilden blir huvudbild.</p>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center justify-end gap-4 pt-4">
+                <a href="/items" 
+                   class="px-6 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors">
+                    Avbryt
+                </a>
+                <button type="submit" 
+                        class="px-6 py-2 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-lg shadow-sm transition-colors">
+                    <svg class="w-5 h-5 inline-block mr-2 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    Spara artikel
+                </button>
+            </div>
+        </form>
+    </div>
+</div

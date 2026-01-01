@@ -1,0 +1,86 @@
+# FrameFlow Production Caddyfile
+# Replace YOUR_DOMAIN with your actual domain names
+
+# Dashboard - Central Landing Page
+frameflowapp.com, www.frameflowapp.com {
+    reverse_proxy frameflow-dashboard:3010 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+        header_up X-Forwarded-Host {host}
+    }
+    
+    encode gzip zstd
+    
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+    
+    log {
+        output file /data/logs/dashboard-access.log {
+            roll_size 100mb
+            roll_keep 5
+        }
+    }
+}
+
+# Inventory Management System
+inventory.frameflowapp.com {
+    reverse_proxy frameflow-inventory:3015 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+        header_up X-Forwarded-Host {host}
+    }
+    
+    # Enable compression
+    encode gzip zstd
+    
+    # Security headers
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+    
+    # Logging
+    log {
+        output file /data/logs/inventory-access.log {
+            roll_size 100mb
+            roll_keep 5
+        }
+    }
+}
+
+# Framing/Order Management System
+framing.frameflowapp.com {
+    reverse_proxy frameflow-framing:3011 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+        header_up X-Forwarded-Host {host}
+    }
+    
+    encode gzip zstd
+    
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+    
+    log {
+        output file /data/logs/framing-access.log {
+            roll_size 100mb
+            roll_keep 5
+        }
+    }
+}

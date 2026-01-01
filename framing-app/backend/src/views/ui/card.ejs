@@ -1,0 +1,9 @@
+<%
+const noPadding = locals.noPadding || false;
+const body = locals.body || '';
+%>
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="<%= noPadding ? '' : 'p-6' %>">
+        <%- body %>
+    </div>
+</div>

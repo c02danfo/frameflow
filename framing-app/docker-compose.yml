@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  framing-app:
+    build: .
+    container_name: framing-app
+    ports:
+      - "3011:3011"
+    environment:
+      - DB_HOST=192.168.0.192
+      - DB_PORT=15432
+      - DB_NAME=framing_app
+      - DB_USER=inventory_user
+      - DB_PASSWORD=inventory_password
+      - INVENTORY_DB_HOST=192.168.0.192
+      - INVENTORY_DB_PORT=15432
+      - INVENTORY_DB_NAME=inventory_artyx
+      - INVENTORY_DB_USER=inventory_user
+      - INVENTORY_DB_PASSWORD=inventory_password
+      - PORT=3011
+      - SESSION_SECRET=framing-app-secret-change-in-production
+      - MOMS_PERCENTAGE=25
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    restart: unless-stopped

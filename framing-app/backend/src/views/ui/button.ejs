@@ -1,0 +1,24 @@
+<%
+const variant = locals.variant || 'primary';
+const type = locals.type || 'button';
+const href = locals.href;
+const text = locals.text || 'Button';
+const classes = locals.classes || '';
+
+let variantClasses = '';
+if (variant === 'primary') {
+    variantClasses = 'bg-sky-600 hover:bg-sky-700 text-white shadow-sm';
+} else if (variant === 'secondary') {
+    variantClasses = 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-300';
+} else if (variant === 'danger') {
+    variantClasses = 'bg-red-600 hover:bg-red-700 text-white shadow-sm';
+}
+
+const baseClasses = 'inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-colors ' + variantClasses + ' ' + classes;
+%>
+
+<% if (href) { %>
+<a href="<%= href %>" class="<%= baseClasses %>"><%= text %></a>
+<% } else { %>
+<button type="<%= type %>" class="<%= baseClasses %>"><%= text %></button>
+<% } %>

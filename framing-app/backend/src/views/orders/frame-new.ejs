@@ -1,0 +1,298 @@
+<div class="max-w-screen-2xl mx-auto">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Ny Artikel</h2>
+            <p class="text-sm font-medium text-slate-500">Order <%= order.order_number %></p>
+        </div>
+        <a href="/orders/<%= order.id %>" class="inline-flex items-center px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 text-sm font-medium rounded-lg transition-colors">
+            ← Tillbaka
+        </a>
+    </div>
+
+    <% if (locals.error) { %>
+    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm font-medium">
+        <%= error %>
+    </div>
+    <% } %>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Form -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden p-6">
+                <form method="POST" action="/orders/<%= order.id %>/frames" id="frameForm" class="space-y-8">
+                    <!-- Basic Info -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label for="motiv" class="block text-sm font-medium text-gray-700">Motiv</label>
+                            <input type="text" id="motiv" name="motiv" placeholder="t.ex. Oljemålning, Foto" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all">
+                        </div>
+                        <div class="space-y-2">
+                            <label for="antal" class="block text-sm font-medium text-gray-700">
+                                Antal<span class="text-red-500 ml-1">*</span>
+                            </label>
+                            <input type="number" id="antal" name="antal" min="1" value="1" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all">
+                        </div>
+                    </div>
+
+                    <!-- Dimensions -->
+                    <div class="pt-8 border-t border-slate-100">
+                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Motiv + Passepartout</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div class="space-y-2">
+                                <label for="motiv_bredd_mm" class="block text-sm font-medium text-gray-700">
+                                    Motivbredd (mm)<span class="text-red-500 ml-1">*</span>
+                                </label>
+                                <input type="number" id="motiv_bredd_mm" name="motiv_bredd_mm" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all">
+                            </div>
+                            <div class="space-y-2">
+                                <label for="motiv_hojd_mm" class="block text-sm font-medium text-gray-700">
+                                    Motivhöjd (mm)<span class="text-red-500 ml-1">*</span>
+                                </label>
+                                <input type="number" id="motiv_hojd_mm" name="motiv_hojd_mm" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="space-y-2">
+                                <label for="pp_vanster_mm" class="block text-sm font-medium text-gray-700">PP Vänster</label>
+                                <input type="number" id="pp_vanster_mm" name="pp_vanster_mm" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all">
+                            </div>
+                            <div class="space-y-2">
+                                <label for="pp_hoger_mm" class="block text-sm font-medium text-gray-700">PP Höger</label>
+                                <input type="number" id="pp_hoger_mm" name="pp_hoger_mm" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all">
+                            </div>
+                            <div class="space-y-2">
+                                <label for="pp_topp_mm" class="block text-sm font-medium text-gray-700">PP Topp</label>
+                                <input type="number" id="pp_topp_mm" name="pp_topp_mm" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all">
+                            </div>
+                            <div class="space-y-2">
+                                <label for="pp_botten_mm" class="block text-sm font-medium text-gray-700">PP Botten</label>
+                                <input type="number" id="pp_botten_mm" name="pp_botten_mm" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Calculation Method -->
+                    <div class="pt-8 border-t border-slate-100">
+                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Beräkningsmetod</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                <label for="calculation_method" class="block text-sm font-medium text-gray-700">Metod</label>
+                                <select id="calculation_method" name="calculation_method" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all bg-white">
+                                    <option value="simple">Enkel (omkrets)</option>
+                                    <option value="standard">Standard (förbrukning)</option>
+                                </select>
+                            </div>
+                            <div id="simple_price_container" class="space-y-2">
+                                <label for="simple_price_per_meter" class="block text-sm font-medium text-gray-700">Pris per meter (Enkel)</label>
+                                <input type="number" id="simple_price_per_meter" name="simple_price_per_meter" step="0.01" value="250" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Materials -->
+                    <div class="pt-8 border-t border-slate-100">
+                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Material</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                <label for="frame_item_id" class="block text-sm font-medium text-gray-700">Ram</label>
+                                <select name="frame_item_id" id="frame_item_id" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all">
+                                    <option value="">Ingen ram</option>
+                                    <% (frames || []).forEach(f => { %>
+                                    <option value="<%= f.id %>"><%= f.name %> (<%= f.sku %>) - <%= f.sales_price %> kr/m</option>
+                                    <% }); %>
+                                </select>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="glass_item_id" class="block text-sm font-medium text-gray-700">Glas</label>
+                                <select name="glass_item_id" id="glass_item_id" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all">
+                                    <option value="">Inget glas</option>
+                                    <% (glasses || []).forEach(g => { %>
+                                    <option value="<%= g.id %>"><%= g.name %> (<%= g.sku %>) - <%= g.sales_price %> kr/m²</option>
+                                    <% }); %>
+                                </select>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="labor_item_id" class="block text-sm font-medium text-gray-700">Arbete</label>
+                                <select name="labor_item_id" id="labor_item_id" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all">
+                                    <option value="">Inget arbete</option>
+                                    <% (labors || []).forEach(l => { %>
+                                    <option value="<%= l.id %>"><%= l.name %> (<%= l.sku %>) - <%= l.sales_price %> kr/m</option>
+                                    <% }); %>
+                                </select>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="passepartout_item_id" class="block text-sm font-medium text-gray-700">Passepartout</label>
+                                <select name="passepartout_item_id" id="passepartout_item_id" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all">
+                                    <option value="">Ingen passepartout</option>
+                                    <% (passepartouts || []).forEach(p => { %>
+                                    <option value="<%= p.id %>"><%= p.name %> (<%= p.sku %>) - <%= p.sales_price %> kr/m²</option>
+                                    <% }); %>
+                                </select>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="passepartout2_item_id" class="block text-sm font-medium text-gray-700">Passepartout 2</label>
+                                <select name="passepartout2_item_id" id="passepartout2_item_id" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all">
+                                    <option value="">Ingen (extra) passepartout</option>
+                                    <% (passepartouts || []).forEach(p => { %>
+                                    <option value="<%= p.id %>"><%= p.name %> (<%= p.sku %>) - <%= p.sales_price %> kr/m²</option>
+                                    <% }); %>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label for="notes" class="block text-sm font-medium text-gray-700">Anteckningar</label>
+                        <textarea id="notes" name="notes" rows="3" placeholder="Valfria noteringar om artikeln" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all resize-y"></textarea>
+                    </div>
+
+                    <input type="hidden" name="passepartout_width_mm" id="passepartout_width_mm" value="" />
+                    <input type="hidden" name="pp2_vanster_mm" value="0" />
+                    <input type="hidden" name="pp2_hoger_mm" value="0" />
+                    <input type="hidden" name="pp2_topp_mm" value="0" />
+                    <input type="hidden" name="pp2_botten_mm" value="0" />
+
+                    <div class="flex items-center justify-end gap-3 pt-8 border-t border-slate-100">
+                        <a href="/orders/<%= order.id %>" class="inline-flex items-center px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 text-sm font-medium rounded-lg transition-colors">
+                            Avbryt
+                        </a>
+                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
+                            Spara ramorder
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Price Preview -->
+        <div class="lg:col-span-1">
+            <div class="sticky top-8 space-y-6">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden p-6">
+                    <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Prisberäkning</h3>
+                    <div id="sizePreview" class="flex flex-wrap gap-2 mb-6"></div>
+                    <div id="pricePreview" class="space-y-4">
+                        <p class="text-sm text-slate-400 italic">Fyll i dimensioner och material för att se pris...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const methodSelect = document.getElementById('calculation_method');
+const simplePriceEl = document.getElementById('simple_price_container');
+
+function updateMethodVisibility() {
+    simplePriceEl.style.display = methodSelect.value === 'simple' ? 'block' : 'none';
+}
+methodSelect.addEventListener('change', updateMethodVisibility);
+updateMethodVisibility();
+
+async function calculatePrice() {
+    const mwMm = parseFloat(document.getElementById('motiv_bredd_mm').value) || 0;
+    const mhMm = parseFloat(document.getElementById('motiv_hojd_mm').value) || 0;
+    const plMm = parseFloat(document.getElementById('pp_vanster_mm').value) || 0;
+    const prMm = parseFloat(document.getElementById('pp_hoger_mm').value) || 0;
+    const ptMm = parseFloat(document.getElementById('pp_topp_mm').value) || 0;
+    const pbMm = parseFloat(document.getElementById('pp_botten_mm').value) || 0;
+
+    if (!mwMm || !mhMm) {
+        document.getElementById('pricePreview').innerHTML = '<p class="text-sm text-slate-400 italic">Fyll i motivmått för att beräkna pris</p>';
+        return;
+    }
+
+    const quantity = Math.max(1, parseInt(document.getElementById('antal')?.value, 10) || 1);
+    const outerWmm = mwMm + plMm + prMm;
+    const outerHmm = mhMm + ptMm + pbMm;
+    const outerArea = (outerWmm / 1000) * (outerHmm / 1000);
+    
+    const formData = {
+        antal: quantity,
+        motiv_bredd_mm: mwMm,
+        motiv_hojd_mm: mhMm,
+        pp_vanster_mm: plMm,
+        pp_hoger_mm: prMm,
+        pp_topp_mm: ptMm,
+        pp_botten_mm: pbMm,
+        width_mm: outerWmm,
+        height_mm: outerHmm,
+        motiv: (document.getElementById('motiv')?.value || '').trim(),
+        calculation_method: document.getElementById('calculation_method').value,
+        frame_item_id: document.getElementById('frame_item_id').value,
+        glass_item_id: document.getElementById('glass_item_id').value,
+        labor_item_id: document.getElementById('labor_item_id').value,
+        passepartout_item_id: document.getElementById('passepartout_item_id').value,
+        passepartout_width_mm: '',
+        simple_price_per_meter: parseFloat(document.getElementById('simple_price_per_meter').value) || 0,
+        passepartout2_item_id: document.getElementById('passepartout2_item_id').value,
+        pp2_vanster_mm: 0, pp2_hoger_mm: 0, pp2_topp_mm: 0, pp2_botten_mm: 0
+    };
+    
+    try {
+        const response = await fetch('/orders/api/calculate-price', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        });
+        const data = await response.json();
+        
+        const omkretsM = (2 * outerWmm + 2 * outerHmm) / 1000;
+        document.getElementById('sizePreview').innerHTML = `
+            <span class="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold text-slate-600 uppercase tracking-tight">Omkrets: ${omkretsM.toFixed(2)}m</span>
+            <span class="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold text-slate-600 uppercase tracking-tight">Area: ${outerArea.toFixed(4)}m²</span>
+            <span class="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold text-slate-600 uppercase tracking-tight">Antal: ${quantity}st</span>
+        `;
+        
+        let html = '<div class="space-y-3">';
+        const addRow = (label, detail, cost) => `
+            <div class="flex justify-between items-center py-2 border-b border-slate-50 text-sm">
+                <div>
+                    <p class="text-slate-400 font-bold text-[10px] uppercase tracking-tight">${label}</p>
+                    <p class="text-slate-600 font-medium">${detail}</p>
+                </div>
+                <span class="text-slate-900 font-bold">${cost} kr</span>
+            </div>
+        `;
+
+        if (data.frame_cost > 0) {
+            const detail = formData.calculation_method === 'simple' ? `${data.frame_length_meters}m × ${formData.simple_price_per_meter}kr/m` : `${data.frame_length_meters}m × pris`;
+            html += addRow('Ram', detail, data.frame_cost);
+        }
+        if (data.glass_cost > 0) html += addRow('Glas', `${data.glass_area_sqm}m²`, data.glass_cost);
+        if (data.passepartout_cost > 0) html += addRow('Passepartout', `${data.passepartout_area_sqm}m²`, data.passepartout_cost);
+        if (data.passepartout2_cost > 0) html += addRow('Passepartout 2', `${data.passepartout2_area_sqm}m²`, data.passepartout2_cost);
+        if (data.labor_cost > 0) html += addRow('Arbete', `${data.frame_length_meters}m`, data.labor_cost);
+        
+        html += `
+            <div class="pt-4 space-y-2">
+                <div class="flex justify-between items-center text-sm">
+                    <span class="text-slate-500 font-medium">Exkl. moms</span>
+                    <span class="text-slate-900 font-bold">${data.total_cost_excl_moms} kr</span>
+                </div>
+                <div class="flex justify-between items-center p-3 bg-emerald-50 rounded-xl border border-emerald-100">
+                    <span class="text-sm font-bold text-emerald-700">Inkl. moms</span>
+                    <span class="text-xl font-extrabold text-emerald-700">${data.total_cost_incl_moms} kr</span>
+                </div>
+            </div>
+        `;
+        html += '</div>';
+        document.getElementById('pricePreview').innerHTML = html;
+    } catch (error) {
+        document.getElementById('pricePreview').innerHTML = '<p class="text-red-500 text-sm font-bold">Kunde inte beräkna pris</p>';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const triggerIds = ['antal', 'motiv_bredd_mm', 'motiv_hojd_mm', 'pp_vanster_mm', 'pp_hoger_mm', 'pp_topp_mm', 'pp_botten_mm', 'calculation_method', 'simple_price_per_meter', 'frame_item_id', 'glass_item_id', 'labor_item_id', 'passepartout_item_id', 'passepartout2_item_id'];
+    triggerIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', calculatePrice);
+            el.addEventListener('change', calculatePrice);
+        }
+    });
+    calculatePrice();
+});
+</script>

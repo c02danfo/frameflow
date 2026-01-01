@@ -1,0 +1,295 @@
+<div class="max-w-screen-2xl mx-auto">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Redigera Artikel</h2>
+            <p class="text-sm font-medium text-slate-500">Order <%= order.order_number %></p>
+        </div>
+        <%- include('../ui/button', { text: '← Tillbaka', href: '/orders/' + order.id, variant: 'secondary' }) %>
+    </div>
+
+    <% if (locals.error) { %>
+    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm font-medium">
+        <%= error %>
+    </div>
+    <% } %>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Form -->
+        <div class="lg:col-span-2">
+            <%- include('../ui/card', { body: \`
+                <form method="POST" action="/orders/\${order.id}/frames/\${frame.id}/edit" id="frameForm" class="space-y-8">
+                    <!-- Basic Info -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <%- include('../ui/form-group', { 
+                            id: 'motiv', 
+                            label: 'Motiv', 
+                            body: include('../ui/input', { id: 'motiv', name: 'motiv', value: frame.motiv || '', placeholder: 't.ex. Oljemålning, Foto' })
+                        }) %>
+                        <%- include('../ui/form-group', { 
+                            id: 'antal', 
+                            label: 'Antal', 
+                            required: true,
+                            body: include('../ui/input', { id: 'antal', name: 'antal', type: 'number', min: '1', value: frame.antal || 1, required: true })
+                        }) %>
+                    </div>
+
+                    <!-- Dimensions -->
+                    <div class="pt-8 border-t border-slate-100">
+                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Motiv + Passepartout</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <%- include('../ui/form-group', { 
+                                id: 'motiv_bredd_mm', 
+                                label: 'Motivbredd (mm)', 
+                                required: true,
+                                body: include('../ui/input', { id: 'motiv_bredd_mm', name: 'motiv_bredd_mm', type: 'number', value: Math.round(frame.motiv_width_mm || 0), required: true })
+                            }) %>
+                            <%- include('../ui/form-group', { 
+                                id: 'motiv_hojd_mm', 
+                                label: 'Motivhöjd (mm)', 
+                                required: true,
+                                body: include('../ui/input', { id: 'motiv_hojd_mm', name: 'motiv_hojd_mm', type: 'number', value: Math.round(frame.motiv_height_mm || 0), required: true })
+                            }) %>
+                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <%- include('../ui/form-group', { id: 'pp_vanster_mm', label: 'PP Vänster', body: include('../ui/input', { id: 'pp_vanster_mm', name: 'pp_vanster_mm', type: 'number', value: Math.round(frame.pp_left_mm || 0) }) }) %>
+                            <%- include('../ui/form-group', { id: 'pp_hoger_mm', label: 'PP Höger', body: include('../ui/input', { id: 'pp_hoger_mm', name: 'pp_hoger_mm', type: 'number', value: Math.round(frame.pp_right_mm || 0) }) }) %>
+                            <%- include('../ui/form-group', { id: 'pp_topp_mm', label: 'PP Topp', body: include('../ui/input', { id: 'pp_topp_mm', name: 'pp_topp_mm', type: 'number', value: Math.round(frame.pp_top_mm || 0) }) }) %>
+                            <%- include('../ui/form-group', { id: 'pp_botten_mm', label: 'PP Botten', body: include('../ui/input', { id: 'pp_botten_mm', name: 'pp_botten_mm', type: 'number', value: Math.round(frame.pp_bottom_mm || 0) }) }) %>
+                        </div>
+                    </div>
+
+                    <!-- Calculation Method -->
+                    <div class="pt-8 border-t border-slate-100">
+                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Beräkningsmetod</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <%- include('../ui/form-group', { 
+                                id: 'calculation_method', 
+                                label: 'Metod', 
+                                body: include('../ui/select', { 
+                                    id: 'calculation_method', 
+                                    name: 'calculation_method', 
+                                    options: [
+                                        { value: 'simple', label: 'Enkel (omkrets)', selected: frame.calculation_method === 'simple' },
+                                        { value: 'standard', label: 'Standard (förbrukning)', selected: frame.calculation_method === 'standard' }
+                                    ]
+                                })
+                            }) %>
+                            <div id="simple_price_container">
+                                <%- include('../ui/form-group', { 
+                                    id: 'simple_price_per_meter', 
+                                    label: 'Pris per meter (Enkel)', 
+                                    body: include('../ui/input', { id: 'simple_price_per_meter', name: 'simple_price_per_meter', type: 'number', step: '0.01', value: frame.manual_simple_price_per_meter || '250' })
+                                }) %>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Materials -->
+                    <div class="pt-8 border-t border-slate-100">
+                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Material</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <%- include('../ui/form-group', { 
+                                id: 'frame_item_id', 
+                                label: 'Ram', 
+                                body: \`
+                                    <select name="frame_item_id" id="frame_item_id" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all">
+                                        <option value="">Ingen ram</option>
+                                        \${(frames || []).map(f => \`<option value="\${f.id}" \${frame.frame_item_id === f.id ? 'selected' : ''}>\${f.name} (\${f.sku}) - \${f.sales_price} kr/m</option>\`).join('')}
+                                    </select>
+                                \`
+                            }) %>
+                            <%- include('../ui/form-group', { 
+                                id: 'glass_item_id', 
+                                label: 'Glas', 
+                                body: \`
+                                    <select name="glass_item_id" id="glass_item_id" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all">
+                                        <option value="">Inget glas</option>
+                                        \${(glasses || []).map(g => \`<option value="\${g.id}" \${frame.glass_item_id === g.id ? 'selected' : ''}>\${g.name} (\${g.sku}) - \${g.sales_price} kr/m²</option>\`).join('')}
+                                    </select>
+                                \`
+                            }) %>
+                            <%- include('../ui/form-group', { 
+                                id: 'labor_item_id', 
+                                label: 'Arbete', 
+                                body: \`
+                                    <select name="labor_item_id" id="labor_item_id" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all">
+                                        <option value="">Inget arbete</option>
+                                        \${(labors || []).map(l => \`<option value="\${l.id}" \${frame.labor_item_id === l.id ? 'selected' : ''}>\${l.name} (\${l.sku}) - \${l.sales_price} kr/m</option>\`).join('')}
+                                    </select>
+                                \`
+                            }) %>
+                            <%- include('../ui/form-group', { 
+                                id: 'passepartout_item_id', 
+                                label: 'Passepartout', 
+                                body: \`
+                                    <select name="passepartout_item_id" id="passepartout_item_id" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all">
+                                        <option value="">Ingen passepartout</option>
+                                        \${(passepartouts || []).map(p => \`<option value="\${p.id}" \${frame.passepartout_item_id === p.id ? 'selected' : ''}>\${p.name} (\${p.sku}) - \${p.sales_price} kr/m²</option>\`).join('')}
+                                    </select>
+                                \`
+                            }) %>
+                            <%- include('../ui/form-group', { 
+                                id: 'passepartout2_item_id', 
+                                label: 'Passepartout 2', 
+                                body: \`
+                                    <select name="passepartout2_item_id" id="passepartout2_item_id" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all">
+                                        <option value="">Ingen (extra) passepartout</option>
+                                        \${(passepartouts || []).map(p => \`<option value="\${p.id}" \${frame.passepartout2_item_id === p.id ? 'selected' : ''}>\${p.name} (\${p.sku}) - \${p.sales_price} kr/m²</option>\`).join('')}
+                                    </select>
+                                \`
+                            }) %>
+                        </div>
+                    </div>
+
+                    <%- include('../ui/form-group', { 
+                        id: 'notes', 
+                        label: 'Anteckningar', 
+                        body: include('../ui/textarea', { id: 'notes', name: 'notes', rows: 3, value: frame.notes || '', placeholder: 'Valfria noteringar om artikeln' })
+                    }) %>
+
+                    <input type="hidden" name="passepartout_width_mm" id="passepartout_width_mm" value="" />
+                    <input type="hidden" name="pp2_vanster_mm" value="0" />
+                    <input type="hidden" name="pp2_hoger_mm" value="0" />
+                    <input type="hidden" name="pp2_topp_mm" value="0" />
+                    <input type="hidden" name="pp2_botten_mm" value="0" />
+
+                    <div class="flex items-center justify-end gap-3 pt-8 border-t border-slate-100">
+                        <%- include('../ui/button', { text: 'Avbryt', href: '/orders/' + order.id, variant: 'secondary' }) %>
+                        <%- include('../ui/button', { text: 'Uppdatera ramorder', type: 'submit', variant: 'primary' }) %>
+                    </div>
+                </form>
+            \`, noPadding: false }) %>
+        </div>
+
+        <!-- Price Preview -->
+        <div class="lg:col-span-1">
+            <div class="sticky top-8 space-y-6">
+                <%- include('../ui/card', { body: \`
+                    <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Prisberäkning</h3>
+                    <div id="sizePreview" class="flex flex-wrap gap-2 mb-6"></div>
+                    <div id="pricePreview" class="space-y-4">
+                        <p class="text-sm text-slate-400 italic">Fyll i dimensioner och material för att se pris...</p>
+                    </div>
+                \`, noPadding: false }) %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const methodSelect = document.getElementById('calculation_method');
+const simplePriceEl = document.getElementById('simple_price_container');
+
+function updateMethodVisibility() {
+    simplePriceEl.style.display = methodSelect.value === 'simple' ? 'block' : 'none';
+}
+methodSelect.addEventListener('change', updateMethodVisibility);
+updateMethodVisibility();
+
+async function calculatePrice() {
+    const mwMm = parseFloat(document.getElementById('motiv_bredd_mm').value) || 0;
+    const mhMm = parseFloat(document.getElementById('motiv_hojd_mm').value) || 0;
+    const plMm = parseFloat(document.getElementById('pp_vanster_mm').value) || 0;
+    const prMm = parseFloat(document.getElementById('pp_hoger_mm').value) || 0;
+    const ptMm = parseFloat(document.getElementById('pp_topp_mm').value) || 0;
+    const pbMm = parseFloat(document.getElementById('pp_botten_mm').value) || 0;
+
+    if (!mwMm || !mhMm) {
+        document.getElementById('pricePreview').innerHTML = '<p class="text-sm text-slate-400 italic">Fyll i motivmått för att beräkna pris</p>';
+        return;
+    }
+
+    const quantity = Math.max(1, parseInt(document.getElementById('antal')?.value, 10) || 1);
+    const outerWmm = mwMm + plMm + prMm;
+    const outerHmm = mhMm + ptMm + pbMm;
+    const outerArea = (outerWmm / 1000) * (outerHmm / 1000);
+    
+    const formData = {
+        antal: quantity,
+        motiv_bredd_mm: mwMm,
+        motiv_hojd_mm: mhMm,
+        pp_vanster_mm: plMm,
+        pp_hoger_mm: prMm,
+        pp_topp_mm: ptMm,
+        pp_botten_mm: pbMm,
+        width_mm: outerWmm,
+        height_mm: outerHmm,
+        motiv: (document.getElementById('motiv')?.value || '').trim(),
+        calculation_method: document.getElementById('calculation_method').value,
+        frame_item_id: document.getElementById('frame_item_id').value,
+        glass_item_id: document.getElementById('glass_item_id').value,
+        labor_item_id: document.getElementById('labor_item_id').value,
+        passepartout_item_id: document.getElementById('passepartout_item_id').value,
+        passepartout_width_mm: '',
+        simple_price_per_meter: parseFloat(document.getElementById('simple_price_per_meter').value) || 0,
+        passepartout2_item_id: document.getElementById('passepartout2_item_id').value,
+        pp2_vanster_mm: 0, pp2_hoger_mm: 0, pp2_topp_mm: 0, pp2_botten_mm: 0
+    };
+    
+    try {
+        const response = await fetch('/orders/api/calculate-price', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        });
+        const data = await response.json();
+        
+        const omkretsM = (2 * outerWmm + 2 * outerHmm) / 1000;
+        document.getElementById('sizePreview').innerHTML = \`
+            <span class="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold text-slate-600 uppercase tracking-tight">Omkrets: \${omkretsM.toFixed(2)}m</span>
+            <span class="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold text-slate-600 uppercase tracking-tight">Area: \${outerArea.toFixed(4)}m²</span>
+            <span class="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold text-slate-600 uppercase tracking-tight">Antal: \${quantity}st</span>
+        \`;
+        
+        let html = '<div class="space-y-3">';
+        const addRow = (label, detail, cost) => \`
+            <div class="flex justify-between items-center py-2 border-b border-slate-50 text-sm">
+                <div>
+                    <p class="text-slate-400 font-bold text-[10px] uppercase tracking-tight">\${label}</p>
+                    <p class="text-slate-600 font-medium">\${detail}</p>
+                </div>
+                <span class="text-slate-900 font-bold">\${cost} kr</span>
+            </div>
+        \`;
+
+        if (data.frame_cost > 0) {
+            const detail = formData.calculation_method === 'simple' ? \`\${data.frame_length_meters}m × \${formData.simple_price_per_meter}kr/m\` : \`\${data.frame_length_meters}m × pris\`;
+            html += addRow('Ram', detail, data.frame_cost);
+        }
+        if (data.glass_cost > 0) html += addRow('Glas', \`\${data.glass_area_sqm}m²\`, data.glass_cost);
+        if (data.passepartout_cost > 0) html += addRow('Passepartout', \`\${data.passepartout_area_sqm}m²\`, data.passepartout_cost);
+        if (data.passepartout2_cost > 0) html += addRow('Passepartout 2', \`\${data.passepartout2_area_sqm}m²\`, data.passepartout2_cost);
+        if (data.labor_cost > 0) html += addRow('Arbete', \`\${data.frame_length_meters}m\`, data.labor_cost);
+        
+        html += \`
+            <div class="pt-4 space-y-2">
+                <div class="flex justify-between items-center text-sm">
+                    <span class="text-slate-500 font-medium">Exkl. moms</span>
+                    <span class="text-slate-900 font-bold">\${data.total_cost_excl_moms} kr</span>
+                </div>
+                <div class="flex justify-between items-center p-3 bg-emerald-50 rounded-xl border border-emerald-100">
+                    <span class="text-sm font-bold text-emerald-700">Inkl. moms</span>
+                    <span class="text-xl font-extrabold text-emerald-700">\${data.total_cost_incl_moms} kr</span>
+                </div>
+            </div>
+        \`;
+        html += '</div>';
+        document.getElementById('pricePreview').innerHTML = html;
+    } catch (error) {
+        document.getElementById('pricePreview').innerHTML = '<p class="text-red-500 text-sm font-bold">Kunde inte beräkna pris</p>';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const triggerIds = ['antal', 'motiv_bredd_mm', 'motiv_hojd_mm', 'pp_vanster_mm', 'pp_hoger_mm', 'pp_topp_mm', 'pp_botten_mm', 'calculation_method', 'simple_price_per_meter', 'frame_item_id', 'glass_item_id', 'labor_item_id', 'passepartout_item_id', 'passepartout2_item_id'];
+    triggerIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', calculatePrice);
+            el.addEventListener('change', calculatePrice);
+        }
+    });
+    calculatePrice();
+});
+</script>

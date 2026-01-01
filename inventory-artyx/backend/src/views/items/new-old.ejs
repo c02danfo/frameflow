@@ -1,0 +1,211 @@
+<div class="max-w-screen-2xl mx-auto">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">New Item</h2>
+    <%- include('../ui/button', { text: '← Back', href: '/items', variant: 'secondary' }) %>
+  </div>
+
+  <!-- Form Card -->
+  <%- include('../ui/card', { body: \`
+    <form action="/items" method="POST" class="space-y-8">
+
+      <!-- Basic Info Section -->
+      <div>
+        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Basic Information</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          
+          <%- include('../ui/form-group', { 
+            id: 'sku_display', 
+            label: 'SKU', 
+            helpText: 'Will be generated automatically',
+            body: include('../ui/input', { id: 'sku_display', name: '', value: 'Generated on save', disabled: true })
+          }) %>
+
+          <%- include('../ui/form-group', { 
+            id: 'barcode_display', 
+            label: 'Barcode', 
+            helpText: 'Code128 barcode is created automatically',
+            body: include('../ui/input', { id: 'barcode_display', name: '', value: 'Generated on save', disabled: true })
+          }) %>
+
+          <%- include('../ui/form-group', { 
+            id: 'name', 
+            label: 'Name', 
+            required: true,
+            body: include('../ui/input', { id: 'name', name: 'name', required: true, placeholder: 'Enter item name' })
+          }) %>
+
+          <%- include('../ui/form-group', { 
+            id: 'category', 
+            label: 'Category', 
+            required: true,
+            helpText: 'Required for SKU generation',
+            body: include('../ui/input', { id: 'category', name: 'category', list: 'categoryList', placeholder: 'Select or type', required: true })
+          }) %>
+          <datalist id="categoryList">
+            <% if (locals.categories && categories.length > 0) { %>
+              <% categories.forEach(function(cat){ %>
+                <option value="<%= cat %>"></option>
+              <% }); %>
+            <% } %>
+          </datalist>
+
+          <%- include('../ui/form-group', { 
+            id: 'supplier', 
+            label: 'Supplier', 
+            body: include('../ui/input', { id: 'supplier', name: 'supplier', list: 'supplierList', placeholder: 'Select or type' })
+          }) %>
+          <datalist id="supplierList">
+            <% if (locals.suppliers && suppliers.length > 0) { %>
+              <% suppliers.forEach(function(s){ %>
+                <option value="<%= s %>"></option>
+              <% }); %>
+            <% } %>
+          </datalist>
+
+          <%- include('../ui/form-group', { 
+            id: 'supplier_item_number', 
+            label: 'Supplier Item Number', 
+            helpText: "Supplier's product code",
+            body: include('../ui/input', { id: 'supplier_item_number', name: 'supplier_item_number', placeholder: 'e.g., SUP-12345' })
+          }) %>
+
+          <%- include('../ui/form-group', { 
+            id: 'color', 
+            label: 'Color', 
+            body: include('../ui/input', { id: 'color', name: 'color', placeholder: 'e.g., White, Black' })
+          }) %>
+
+          <%- include('../ui/form-group', { 
+            id: 'stock_unit', 
+            label: 'Stock Unit', 
+            helpText: 'How you count in warehouse',
+            body: include('../ui/select', { id: 'stock_unit', name: 'stock_unit', placeholder: '-- Select --', body: \\\`
+              <option value="pieces">Pieces</option>
+              <option value="sheets">Sheets</option>
+              <option value="rolls">Rolls</option>
+              <option value="meters">Meters</option>
+              <option value="length_m">Length (m)</option>
+            \\\` })
+          }) %>
+
+          <%- include('../ui/form-group', { 
+            id: 'sales_unit', 
+            label: 'Sales Unit', 
+            helpText: 'How you price/sell',
+            body: include('../ui/select', { id: 'sales_unit', name: 'sales_unit', placeholder: '-- Select --', body: \\\`
+              <option value="m²">m² (area)</option>
+              <option value="m">m (length)</option>
+              <option value="pieces">Pieces</option>
+              <option value="cm">cm</option>
+            \\\` })
+          }) %>
+
+          <%- include('../ui/form-group', { 
+            id: 'unit_size', 
+            label: 'Size of Unit (m/m²)', 
+            helpText: 'Size of 1 stock unit in sales units',
+            body: include('../ui/input', { id: 'unit_size', name: 'unit_size', type: 'number', step: '0.0001', placeholder: 'e.g., 1.2' })
+          }) %>
+        </div>
+      </div>
+
+      <!-- Dimensions Section -->
+      <div>
+        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Dimensions (optional)</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+          <%- include('../ui/form-group', { id: 'dim_width', label: 'Width', body: include('../ui/input', { id: 'dim_width', name: 'dim_width', type: 'number', step: '0.01' }) }) %>
+          <%- include('../ui/form-group', { id: 'dim_height', label: 'Height', body: include('../ui/input', { id: 'dim_height', name: 'dim_height', type: 'number', step: '0.01' }) }) %>
+          <%- include('../ui/form-group', { id: 'dim_length', label: 'Length', body: include('../ui/input', { id: 'dim_length', name: 'dim_length', type: 'number', step: '0.01' }) }) %>
+          <%- include('../ui/form-group', { id: 'dim_thickness', label: 'Thickness', body: include('../ui/input', { id: 'dim_thickness', name: 'dim_thickness', type: 'number', step: '0.01' }) }) %>
+          <%- include('../ui/form-group', { id: 'dim_unit', label: 'Unit', body: include('../ui/select', { id: 'dim_unit', name: 'dim_unit', body: \\\`
+            <option value="mm">mm</option>
+            <option value="cm">cm</option>
+            <option value="m">m</option>
+          \\\` }) }) %>
+        </div>
+      </div>
+
+      <!-- Pricing Section -->
+      <div>
+        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Pricing</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <%- include('../ui/form-group', { 
+            id: 'purchase_price', 
+            label: 'Purchase Price', 
+            body: include('../ui/input', { id: 'purchase_price', name: 'purchase_price', type: 'number', step: '0.01' })
+          }) %>
+
+          <%- include('../ui/form-group', { 
+            id: 'price_group', 
+            label: 'Price Group', 
+            helpText: 'Selecting a price group will suggest a sales price',
+            body: include('../ui/select', { id: 'price_group', name: 'price_group', placeholder: '-- Select Price Group --', body: \\\`
+              <% if (locals.price_groups && price_groups.length > 0) { %>
+                <% price_groups.forEach(function(pg){ %>
+                  <option value="<%= pg.name %>" data-markup="<%= pg.markup_percentage %>"><%= pg.name %> (<%= pg.markup_percentage %>%)</option>
+                <% }); %>
+              <% } %>
+            \\\` })
+          }) %>
+
+          <%- include('../ui/form-group', { 
+            id: 'sales_price', 
+            label: 'Sales Price', 
+            helpText: 'Can be manually overridden',
+            body: \\\`
+              <div class="relative">
+                <%- include('../ui/input', { id: 'sales_price', name: 'sales_price', type: 'number', step: '0.01' }) %>
+                <span id="suggested-badge" class="absolute right-3 top-1/2 -translate-y-1/2 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700 uppercase tracking-tight" style="display:none;">Suggested</span>
+              </div>
+            \\\`
+          }) %>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center justify-end gap-3 pt-6 border-t border-slate-100">
+        <%- include('../ui/button', { text: 'Cancel', href: '/items', variant: 'secondary' }) %>
+        <%- include('../ui/button', { text: 'Create Item', type: 'submit', variant: 'primary' }) %>
+      </div>
+    </form>
+  \\\`, noPadding: false }) %>
+</div>
+
+<script>
+  // Auto-calculate sales price based on price group and purchase price
+  const priceGroupSelect = document.getElementById('price_group');
+  const purchasePriceInput = document.getElementById('purchase_price');
+  const salesPriceInput = document.getElementById('sales_price');
+  const suggestedBadge = document.getElementById('suggested-badge');
+  
+  let manualOverride = false;
+  
+  salesPriceInput.addEventListener('input', function() {
+    manualOverride = true;
+    suggestedBadge.style.display = 'none';
+  });
+  
+  function calculateSalesPrice() {
+    if (manualOverride) return;
+    const selectedOption = priceGroupSelect.options[priceGroupSelect.selectedIndex];
+    const markup = parseFloat(selectedOption?.getAttribute('data-markup'));
+    const purchasePrice = parseFloat(purchasePriceInput.value);
+    
+    if (markup && purchasePrice && purchasePrice > 0) {
+      const suggestedPrice = (purchasePrice * markup / 100).toFixed(2);
+      salesPriceInput.value = suggestedPrice;
+      suggestedBadge.style.display = 'inline-flex';
+      manualOverride = false;
+    } else {
+      suggestedBadge.style.display = 'none';
+    }
+  }
+  
+  priceGroupSelect.addEventListener('change', function() {
+    manualOverride = false;
+    calculateSalesPrice();
+  });
+  
+  purchasePriceInput.addEventListener('input', calculateSalesPrice);
+</script>

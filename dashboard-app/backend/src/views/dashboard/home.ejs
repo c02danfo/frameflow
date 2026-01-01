@@ -1,0 +1,49 @@
+<div class="bg-gray-50 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <!-- Welcome section -->
+        <div class="mb-12">
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">Välkommen, <%= user.firstName %></h1>
+            <p class="text-lg text-gray-600">
+                Du är inloggad som <span class="font-medium text-gray-900"><%= user.email %></span>
+            </p>
+        </div>
+
+        <!-- Modules header -->
+        <div class="mb-6">
+            <h2 class="text-2xl font-semibold text-gray-900">Välj modul för att fortsätta</h2>
+            <p class="text-gray-600 mt-1">Klicka på en modul för att öppna den</p>
+        </div>
+
+        <!-- App modules grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <% apps.forEach(app => { %>
+            <a href="<%= app.url %>" 
+               class="group bg-white rounded-xl shadow-sm hover:shadow-lg border border-gray-200 hover:border-sky-300 p-6 transition-all duration-200 hover:-translate-y-1">
+                
+                <!-- Icon -->
+                <div class="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-sky-500 to-sky-600 rounded-xl mb-4 text-3xl shadow-lg group-hover:shadow-xl transition-shadow">
+                    <%= app.icon %>
+                </div>
+                
+                <!-- Title -->
+                <h3 class="text-xl font-bold text-gray-900 group-hover:text-sky-600 transition-colors mb-2">
+                    <%= app.name %>
+                </h3>
+                
+                <!-- Description -->
+                <p class="text-gray-600 text-sm leading-relaxed mb-4">
+                    <%= app.description %>
+                </p>
+                
+                <!-- Link arrow -->
+                <div class="flex items-center text-sky-600 font-semibold text-sm group-hover:text-sky-700">
+                    <span>Öppna modul</span>
+                    <svg class="w-4 h-4 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </div>
+            </a>
+            <% }); %>
+        </div>
+    </div>
+</div>

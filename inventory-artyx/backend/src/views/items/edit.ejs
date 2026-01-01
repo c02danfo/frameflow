@@ -1,0 +1,285 @@
+<div class="max-w-screen-2xl mx-auto">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Redigera artikel: <%= item.name %></h2>
+        <%- include('../ui/button', { text: '← Tillbaka', href: '/items', variant: 'secondary' }) %>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Form -->
+        <div class="lg:col-span-2 space-y-8">
+            <%- include('../ui/card', { body: \`
+                <form action="/items/\${item.id}" method="POST" class="space-y-8">
+                    <!-- Basic Info -->
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Grundläggande information</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <%- include('../ui/form-group', { 
+                                id: 'sku', 
+                                label: 'SKU', 
+                                body: include('../ui/input', { id: 'sku', name: 'sku', value: item.sku, disabled: true })
+                            }) %>
+                            
+                            <div class="md:col-span-2">
+                                <%- include('../ui/form-group', { 
+                                    id: 'name', 
+                                    label: 'Namn', 
+                                    required: true,
+                                    body: include('../ui/input', { id: 'name', name: 'name', value: item.name, required: true })
+                                }) %>
+                            </div>
+
+                            <%- include('../ui/form-group', { 
+                                id: 'category', 
+                                label: 'Kategori', 
+                                body: \`
+                                    <input type="text" name="category" id="category" value="\${item.category || ''}" list="categoryList"
+                                           class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all placeholder:text-slate-400">
+                                    <datalist id="categoryList">
+                                        \${(categories || []).map(cat => \`<option value="\${cat}"></option>\`).join('')}
+                                    </datalist>
+                                \`
+                            }) %>
+
+                            <%- include('../ui/form-group', { 
+                                id: 'supplier', 
+                                label: 'Leverantör', 
+                                body: \`
+                                    <input type="text" name="supplier" id="supplier" value="\${item.supplier || ''}" list="supplierList"
+                                           class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all placeholder:text-slate-400">
+                                    <datalist id="supplierList">
+                                        \${(suppliers || []).map(s => \`<option value="\${s}"></option>\`).join('')}
+                                    </datalist>
+                                \`
+                            }) %>
+
+                            <%- include('../ui/form-group', { 
+                                id: 'supplier_item_number', 
+                                label: 'Lev. artnr', 
+                                body: include('../ui/input', { id: 'supplier_item_number', name: 'supplier_item_number', value: item.supplier_item_number || '' })
+                            }) %>
+                        </div>
+                    </div>
+
+                    <!-- Units & Dimensions -->
+                    <div class="pt-8 border-t border-slate-100">
+                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Enheter & Dimensioner</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <%- include('../ui/form-group', { 
+                                id: 'stock_unit', 
+                                label: 'Lagerenhet', 
+                                body: include('../ui/select', { 
+                                    id: 'stock_unit', 
+                                    name: 'stock_unit', 
+                                    options: [
+                                        { value: 'pieces', label: 'Styck (st)', selected: item.stock_unit === 'pieces' },
+                                        { value: 'sheets', label: 'Ark', selected: item.stock_unit === 'sheets' },
+                                        { value: 'rolls', label: 'Rullar', selected: item.stock_unit === 'rolls' },
+                                        { value: 'meters', label: 'Meter (m)', selected: item.stock_unit === 'meters' },
+                                        { value: 'length_m', label: 'Längd (m)', selected: item.stock_unit === 'length_m' }
+                                    ]
+                                })
+                            }) %>
+
+                            <%- include('../ui/form-group', { 
+                                id: 'sales_unit', 
+                                label: 'Försäljningsenhet', 
+                                body: include('../ui/select', { 
+                                    id: 'sales_unit', 
+                                    name: 'sales_unit', 
+                                    options: [
+                                        { value: 'm²', label: 'm² (area)', selected: item.sales_unit === 'm²' },
+                                        { value: 'm', label: 'm (längd)', selected: item.sales_unit === 'm' },
+                                        { value: 'pieces', label: 'Styck (st)', selected: item.sales_unit === 'pieces' },
+                                        { value: 'cm', label: 'cm', selected: item.sales_unit === 'cm' }
+                                    ]
+                                })
+                            }) %>
+
+                            <%- include('../ui/form-group', { 
+                                id: 'unit_size', 
+                                label: 'Enhetsstorlek', 
+                                body: include('../ui/input', { id: 'unit_size', name: 'unit_size', type: 'number', step: '0.0001', value: item.unit_size || '' })
+                            }) %>
+                        </div>
+
+                        <% const dims = item.unit_dimensions ? (typeof item.unit_dimensions === 'string' ? JSON.parse(item.unit_dimensions) : item.unit_dimensions) : {}; %>
+                        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mt-6">
+                            <%- include('../ui/form-group', { id: 'dim_width', label: 'Bredd', body: include('../ui/input', { id: 'dim_width', name: 'dim_width', type: 'number', step: '0.01', value: dims.width || '' }) }) %>
+                            <%- include('../ui/form-group', { id: 'dim_height', label: 'Höjd', body: include('../ui/input', { id: 'dim_height', name: 'dim_height', type: 'number', step: '0.01', value: dims.height || '' }) }) %>
+                            <%- include('../ui/form-group', { id: 'dim_length', label: 'Längd', body: include('../ui/input', { id: 'dim_length', name: 'dim_length', type: 'number', step: '0.01', value: dims.length || '' }) }) %>
+                            <%- include('../ui/form-group', { id: 'dim_thickness', label: 'Tjocklek', body: include('../ui/input', { id: 'dim_thickness', name: 'dim_thickness', type: 'number', step: '0.01', value: dims.thickness || '' }) }) %>
+                            <%- include('../ui/form-group', { 
+                                id: 'dim_unit', 
+                                label: 'Enhet', 
+                                body: include('../ui/select', { 
+                                    id: 'dim_unit', 
+                                    name: 'dim_unit', 
+                                    options: [
+                                        { value: 'mm', label: 'mm', selected: dims.unit === 'mm' },
+                                        { value: 'cm', label: 'cm', selected: dims.unit === 'cm' },
+                                        { value: 'm', label: 'm', selected: dims.unit === 'm' }
+                                    ]
+                                })
+                            }) %>
+                        </div>
+                    </div>
+
+                    <!-- Pricing -->
+                    <div class="pt-8 border-t border-slate-100">
+                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Prissättning</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <%- include('../ui/form-group', { 
+                                id: 'purchase_price', 
+                                label: 'Inköpspris', 
+                                body: include('../ui/input', { id: 'purchase_price', name: 'purchase_price', type: 'number', step: '0.01', value: item.purchase_price || '' })
+                            }) %>
+
+                            <%- include('../ui/form-group', { 
+                                id: 'price_group', 
+                                label: 'Prisgrupp', 
+                                body: \`
+                                    <select name="price_group" id="price_group" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all">
+                                        <option value="">-- Välj prisgrupp --</option>
+                                        \${(price_groups || []).map(pg => \`<option value="\${pg.name}" data-markup="\${pg.markup_percentage}" \${item.price_group === pg.name ? 'selected' : ''}>\${pg.name} (\${pg.markup_percentage}%)</option>\`).join('')}
+                                    </select>
+                                \`
+                            }) %>
+
+                            <%- include('../ui/form-group', { 
+                                id: 'sales_price', 
+                                label: 'Försäljningspris', 
+                                body: \`
+                                    <div class="relative">
+                                        \${include('../ui/input', { id: 'sales_price', name: 'sales_price', type: 'number', step: '0.01', value: item.sales_price || '' })}
+                                        <span id="suggested-badge" class="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-0.5 rounded text-[10px] font-bold bg-sky-100 text-sky-700 uppercase tracking-tight" style="display:none;">Förslag</span>
+                                    </div>
+                                \`
+                            }) %>
+                        </div>
+                    </div>
+
+                    <!-- Inventory -->
+                    <div class="pt-8 border-t border-slate-100">
+                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Lagerstatus</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <%- include('../ui/form-group', { 
+                                id: 'quantity', 
+                                label: 'Antal i lager', 
+                                body: include('../ui/input', { id: 'quantity', name: 'quantity', type: 'number', step: '0.01', value: item.quantity || 0 })
+                            }) %>
+
+                            <%- include('../ui/form-group', { 
+                                id: 'add_quantity', 
+                                label: 'Lägg till antal (inköp)', 
+                                body: include('../ui/input', { id: 'add_quantity', name: 'add_quantity', type: 'number', step: '0.01', placeholder: 't.ex. 10' })
+                            }) %>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-3 pt-8 border-t border-slate-100">
+                        <%- include('../ui/button', { text: 'Avbryt', href: '/items', variant: 'secondary' }) %>
+                        <%- include('../ui/button', { text: 'Uppdatera artikel', type: 'submit', variant: 'primary' }) %>
+                    </div>
+                </form>
+            \`, noPadding: false }) %>
+        </div>
+
+        <!-- Sidebar: Images & Codes -->
+        <div class="space-y-8">
+            <!-- Images -->
+            <%- include('../ui/card', { body: \`
+                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Produktbilder (Max 5)</h3>
+                
+                <% if (images && images.length > 0) { %>
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <% images.forEach(function(img, index) { %>
+                            <div class="relative group">
+                                <div class="aspect-square rounded-lg overflow-hidden bg-slate-50 border \${img.is_primary ? 'border-sky-500 ring-2 ring-sky-500/20' : 'border-slate-200'}">
+                                    <img src="/items/\${item.id}/image/\${img.filename}" class="w-full h-full object-cover">
+                                </div>
+                                <div class="mt-2 flex flex-col gap-1">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-[10px] font-bold uppercase tracking-tight \${img.is_primary ? 'text-sky-600' : 'text-slate-400'}">
+                                            \${img.is_primary ? 'Primär' : 'Bild ' + (index + 1)}
+                                        </span>
+                                        <form method="POST" action="/items/\${item.id}/delete-image/\${img.id}" onsubmit="return confirm('Ta bort bilden?');">
+                                            <button type="submit" class="text-red-500 hover:text-red-700 text-[10px] font-bold uppercase tracking-tight">Ta bort</button>
+                                        </form>
+                                    </div>
+                                    <% if (!img.is_primary) { %>
+                                        <form method="POST" action="/items/\${item.id}/set-primary/\${img.id}">
+                                            <button type="submit" class="w-full py-1 text-[10px] font-bold uppercase tracking-tight text-sky-600 bg-sky-50 hover:bg-sky-100 rounded transition-colors">
+                                                Sätt som primär
+                                            </button>
+                                        </form>
+                                    <% } %>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                <% } %>
+
+                <% if (!images || images.length < 5) { %>
+                    <form method="POST" action="/items/\${item.id}/upload-images" enctype="multipart/form-data" class="space-y-4">
+                        <input type="file" name="images" id="images" accept="image/*" multiple required
+                               class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100 cursor-pointer">
+                        <%- include('../ui/button', { text: 'Ladda upp bilder', type: 'submit', variant: 'primary', className: 'w-full' }) %>
+                    </form>
+                <% } %>
+            \`, noPadding: false }) %>
+
+            <!-- Barcode & QR -->
+            <%- include('../ui/card', { body: \`
+                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Koder</h3>
+                <div class="space-y-6">
+                    <div class="text-center p-4 bg-slate-50 rounded-xl border border-slate-100">
+                        <img src="/items/\${item.id}/barcode.png" class="max-h-16 mx-auto mb-2">
+                        <p class="text-xs font-mono text-slate-500">\${item.barcode}</p>
+                        <%- include('../ui/button', { text: '🖨️ Skriv ut etikett', href: '/items/' + item.id + '/print-label', variant: 'secondary', className: 'mt-4 w-full' }) %>
+                    </div>
+                    <div class="text-center p-4 bg-slate-50 rounded-xl border border-slate-100">
+                        <img src="/items/\${item.id}/qrcode.png" class="max-h-32 mx-auto mb-2">
+                        <p class="text-xs font-mono text-slate-500">\${item.sku}</p>
+                        <%- include('../ui/button', { text: 'Visa detaljer', href: '/items/' + item.id + '/view', variant: 'secondary', className: 'mt-4 w-full' }) %>
+                    </div>
+                </div>
+            \`, noPadding: false }) %>
+        </div>
+    </div>
+</div>
+
+<script>
+    const priceGroupSelect = document.getElementById('price_group');
+    const purchasePriceInput = document.getElementById('purchase_price');
+    const salesPriceInput = document.getElementById('sales_price');
+    const suggestedBadge = document.getElementById('suggested-badge');
+    
+    let manualOverride = false;
+    
+    salesPriceInput.addEventListener('input', () => {
+        manualOverride = true;
+        suggestedBadge.style.display = 'none';
+    });
+    
+    function calculateSalesPrice() {
+        if (manualOverride) return;
+        const selectedOption = priceGroupSelect.options[priceGroupSelect.selectedIndex];
+        const markup = parseFloat(selectedOption.getAttribute('data-markup'));
+        const purchasePrice = parseFloat(purchasePriceInput.value);
+        
+        if (markup && purchasePrice && purchasePrice > 0) {
+            const suggestedPrice = (purchasePrice * markup / 100).toFixed(2);
+            salesPriceInput.value = suggestedPrice;
+            suggestedBadge.style.display = 'inline-flex';
+        } else {
+            suggestedBadge.style.display = 'none';
+        }
+    }
+    
+    priceGroupSelect.addEventListener('change', () => {
+        manualOverride = false;
+        calculateSalesPrice();
+    });
+    purchasePriceInput.addEventListener('input', calculateSalesPrice);
+</script>

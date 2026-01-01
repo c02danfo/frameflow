@@ -1,0 +1,198 @@
+<div class="max-w-screen-2xl mx-auto">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-4">
+            <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Order <%= order.order_number %></h2>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider 
+                <%= order.status === 'confirmed' ? 'bg-emerald-100 text-emerald-700' : 
+                   order.status === 'draft' ? 'bg-amber-100 text-amber-700' : 
+                   'bg-slate-100 text-slate-600' %>">
+                <%= order.status %>
+            </span>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="/orders" class="inline-flex items-center px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 text-sm font-medium rounded-lg transition-colors">
+                ← Tillbaka
+            </a>
+            
+            <% if (order.status === 'draft') { %>
+                <form method="POST" action="/orders/<%= order.id %>/confirm">
+                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
+                        Bekräfta order
+                    </button>
+                </form>
+            <% } %>
+
+            <!-- Document Dropdown -->
+            <div class="relative inline-block text-left" x-data="{ open: false }">
+                <button @click="open = !open" type="button" class="inline-flex items-center gap-2 px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white text-sm font-bold rounded-lg transition-all shadow-sm">
+                    Skapa dokument
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-56 rounded-xl shadow-xl bg-white ring-1 ring-black ring-opacity-5 z-50 overflow-hidden">
+                    <div class="py-1">
+                        <a href="/orders/<%= order.id %>/pdf" class="block px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 font-medium border-b border-slate-50">Ramorder PDF</a>
+                        <a href="/orders/<%= order.id %>/offert/pdf" class="block px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 font-medium border-b border-slate-50">Offert PDF</a>
+                        <a href="/orders/<%= order.id %>/arbetsorder/pdf" class="block px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 font-medium border-b border-slate-50">Arbetsorder PDF</a>
+                        <a href="/orders/<%= order.id %>/kvitto/pdf" class="block px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 font-medium border-b border-slate-50">Kvitto</a>
+                        <a href="/orders/<%= order.id %>/excel" class="block px-4 py-2.5 text-sm text-sky-600 hover:bg-sky-50 font-bold">Excel (.xlsx)</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Order Summary -->
+        <div class="lg:col-span-1 space-y-6">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden p-6">
+                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Orderdetaljer</h3>
+                <div class="space-y-4">
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-tight">Kund</p>
+                        <a href="/customers/<%= order.customer_id %>" class="text-sky-600 hover:text-sky-700 font-bold"><%= order.customer_name %></a>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-tight">Orderdatum</p>
+                            <p class="text-sm font-medium text-slate-900"><%= order.order_date ? new Date(order.order_date).toISOString().split('T')[0] : '-' %></p>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-tight">Leveransdatum</p>
+                            <p class="text-sm font-medium text-slate-900"><%= order.delivery_date ? new Date(order.delivery_date).toISOString().split('T')[0] : '-' %></p>
+                        </div>
+                    </div>
+                    <% if (order.notes) { %>
+                        <div class="pt-4 border-t border-slate-100">
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-tight">Anteckningar</p>
+                            <p class="text-sm text-slate-600 mt-1"><%= order.notes %></p>
+                        </div>
+                    <% } %>
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-slate-100 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-medium text-slate-500">Totalt exkl. moms</span>
+                        <span class="text-lg font-bold text-slate-900"><%= order.total_price_excl_moms || 0 %> kr</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-emerald-50 rounded-xl border border-emerald-100">
+                        <span class="text-sm font-bold text-emerald-700">Totalt inkl. moms</span>
+                        <span class="text-xl font-extrabold text-emerald-700"><%= order.total_price_incl_moms || 0 %> kr</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Frame Orders List -->
+        <div class="lg:col-span-2 space-y-6">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold text-slate-900">Artiklar</h3>
+                <% if (order.status === 'draft') { %>
+                    <a href="/orders/<%= order.id %>/frames/new" class="inline-flex items-center px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
+                        + Skapa artikel
+                    </a>
+                <% } %>
+            </div>
+
+            <% if (frameOrders.length === 0) { %>
+                <div class="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-12 text-center">
+                    <p class="text-slate-400 font-medium">Inga ramordrar ännu</p>
+                </div>
+            <% } else { %>
+                <% frameOrders.forEach((frame, index) => { %>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden p-6">
+                        <div class="flex justify-between items-start mb-6">
+                            <div>
+                                <h4 class="text-lg font-bold text-slate-900">Ramorder <%= index + 1 %></h4>
+                                <% if (frame.motiv) { %>
+                                    <p class="text-sm text-slate-500 font-medium mt-1"><%= frame.motiv %></p>
+                                <% } %>
+                            </div>
+                            <div class="flex gap-2">
+                                <% if (order.status === 'draft') { %>
+                                    <a href="/orders/<%= order.id %>/frames/<%= frame.id %>/edit" class="p-2 text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-all">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                    </a>
+                                    <form method="POST" action="/orders/<%= order.id %>/frames/<%= frame.id %>/delete" onsubmit="return confirm('Ta bort ramorder?');" class="inline">
+                                        <button type="submit" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                        </button>
+                                    </form>
+                                <% } %>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                            <div class="space-y-3">
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-slate-400 font-medium">Dimensioner</span>
+                                    <span class="text-slate-900 font-bold"><%= Math.round(frame.width_mm || 0) %> × <%= Math.round(frame.height_mm || 0) %> mm</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-slate-400 font-medium">Antal</span>
+                                    <span class="text-slate-900 font-bold"><%= frame.antal || 1 %> st</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-slate-400 font-medium">Metod</span>
+                                    <span class="text-slate-900 font-bold"><%= frame.calculation_method === 'simple' ? 'Enkel' : 'Standard' %></span>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 text-[10px] text-slate-500 font-mono space-y-1">
+                                <% 
+                                    const asNumber = (v) => { const n = parseFloat(v); return Number.isFinite(n) ? n : 0; };
+                                    const sheetWidthMm = (frame.motiv_width_mm != null) ? (asNumber(frame.motiv_width_mm) + asNumber(frame.pp_left_mm) + asNumber(frame.pp_right_mm)) : asNumber(frame.width_mm);
+                                    const sheetHeightMm = (frame.motiv_height_mm != null) ? (asNumber(frame.motiv_height_mm) + asNumber(frame.pp_top_mm) + asNumber(frame.pp_bottom_mm)) : asNumber(frame.height_mm);
+                                %>
+                                <p>Omkrets: <%= ((parseFloat(frame.circumference_mm || 0)) / 1000).toFixed(2) %> m</p>
+                                <p>Area: <%= (parseFloat(frame.outer_area_sqm || 0)).toFixed(4) %> m²</p>
+                                <p>Ark: <%= sheetWidthMm.toFixed(2) %> × <%= sheetHeightMm.toFixed(2) %> mm</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2 mb-8">
+                            <% if (frame.frame_item_name) { %>
+                                <div class="flex justify-between items-center py-2 border-b border-slate-50 text-sm">
+                                    <span class="text-slate-600"><strong>Ram:</strong> <%= frame.frame_item_name %></span>
+                                    <span class="text-slate-900 font-medium"><%= frame.frame_cost %> kr</span>
+                                </div>
+                            <% } %>
+                            <% if (frame.glass_item_name) { %>
+                                <div class="flex justify-between items-center py-2 border-b border-slate-50 text-sm">
+                                    <span class="text-slate-600"><strong>Glas:</strong> <%= frame.glass_item_name %></span>
+                                    <span class="text-slate-900 font-medium"><%= frame.glass_cost %> kr</span>
+                                </div>
+                            <% } %>
+                            <% if (frame.passepartout_item_name) { %>
+                                <div class="flex justify-between items-center py-2 border-b border-slate-50 text-sm">
+                                    <span class="text-slate-600"><strong>Passepartout:</strong> <%= frame.passepartout_item_name %></span>
+                                    <span class="text-slate-900 font-medium"><%= frame.passepartout_cost %> kr</span>
+                                </div>
+                            <% } %>
+                            <% if (frame.labor_item_name && frame.calculation_method !== 'simple') { %>
+                                <div class="flex justify-between items-center py-2 border-b border-slate-50 text-sm">
+                                    <span class="text-slate-600"><strong>Arbete:</strong> <%= frame.labor_item_name %></span>
+                                    <span class="text-slate-900 font-medium"><%= frame.labor_cost || 0 %> kr</span>
+                                </div>
+                            <% } %>
+                        </div>
+
+                        <div class="flex justify-between items-end">
+                            <% if (frame.notes) { %>
+                                <div class="max-w-xs">
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Noteringar</p>
+                                    <p class="text-xs text-slate-500 mt-1 italic">"<%= frame.notes %>"</p>
+                                </div>
+                            <% } else { %>
+                                <div></div>
+                            <% } %>
+                            <div class="text-right">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Pris inkl. moms</p>
+                                <p class="text-xl font-extrabold text-emerald-600"><%= frame.total_cost_incl_moms %> kr</p>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } %>
+        </div>
+    </div>
+</div>

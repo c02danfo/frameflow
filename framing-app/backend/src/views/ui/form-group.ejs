@@ -1,0 +1,18 @@
+<%
+const id = locals.id || '';
+const label = locals.label || '';
+const required = locals.required || false;
+const helpText = locals.helpText || '';
+const body = locals.body || '';
+%>
+<div class="space-y-2">
+    <% if (label) { %>
+    <label for="<%= id %>" class="block text-sm font-medium text-gray-700">
+        <%= label %><% if (required) { %><span class="text-red-500 ml-1">*</span><% } %>
+    </label>
+    <% } %>
+    <%- body %>
+    <% if (helpText) { %>
+    <p class="text-xs text-gray-500"><%= helpText %></p>
+    <% } %>
+</div>

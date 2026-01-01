@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frame Flow App - Inloggning</title>
+    <link rel="stylesheet" href="/css/theme.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-family);
+        }
+        .login-container {
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            width: 100%;
+            max-width: 420px;
+            padding: var(--spacing-xl);
+        }
+        .login-header {
+            text-align: center;
+            margin-bottom: var(--spacing-xl);
+        }
+        .login-header h1 {
+            color: var(--primary-color);
+            font-size: var(--font-size-3xl);
+            margin: 0;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+        }
+        .login-header p {
+            color: var(--text-muted);
+            font-size: var(--font-size-base);
+            margin: var(--spacing-sm) 0 0 0;
+        }
+        .form-group {
+            margin-bottom: var(--spacing-md);
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: var(--spacing-xs);
+            font-weight: 600;
+            color: var(--text-main);
+            font-size: var(--font-size-sm);
+        }
+        .form-group input {
+            width: 100%;
+            padding: var(--spacing-md);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-base);
+            transition: all 0.2s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        .btn-submit {
+            width: 100%;
+            margin-top: var(--spacing-lg);
+            padding: var(--spacing-md);
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-base);
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .btn-submit:hover {
+            background: var(--accent-hover);
+        }
+        .error-alert {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: var(--spacing-md);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--spacing-lg);
+            font-size: var(--font-size-sm);
+            border: 1px solid #fecaca;
+        }
+        .footer-text {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: var(--font-size-sm);
+            margin-top: var(--spacing-lg);
+        }
+    </style>
+</head>
+<body>
+<div class="login-container">
+    <div class="login-header">
+        <h1>Frame Flow App</h1>
+        <p>Centraliserad inloggning för alla moduler</p>
+    </div>
+    
+    <% if (typeof error !== 'undefined' && error) { %>
+    <div class="error-alert">
+        <%= error %>
+    </div>
+    <% } %>
+    
+    <form method="POST" action="/auth/login">
+        <input type="hidden" name="returnTo" value="<%= typeof returnTo !== 'undefined' ? returnTo : '/' %>">
+        <div class="form-group">
+            <label for="email">E-post</label>
+            <input 
+                type="email" 
+                id="email"
+                name="email" 
+                required 
+                placeholder="admin@demo.local"
+                autofocus
+            >
+        </div>
+        
+        <div class="form-group">
+            <label for="password">Lösenord</label>
+            <input 
+                type="password" 
+                id="password"
+                name="password" 
+                required 
+                placeholder="Ditt lösenord"
+            >
+        </div>
+        
+        <button type="submit" class="btn-submit">Logga in</button>
+    </form>
+    
+    <div class="footer-text">
+        <strong>Demo-konto:</strong><br>
+        admin@demo.local / admin123
+    </div>
+</div>
+
+<!-- Lägg servervärden här (EJS i “data”, inte i JS-kod) -->
+<script type="application/json" id="login-debug-config"><%- JSON.stringify({
+  domain: (typeof domain !== 'undefined' ? domain : null),
+  authServiceUrl: (typeof authServiceUrl !== 'undefined' ? authServiceUrl : null)
+}) %></script>
+
+<script>
+    (function() {
+        const params = new URLSearchParams(window.location.search);
+        const error = params.get('error');
+        if (error) {
+            console.warn('[FrameFlow login] error:', error);
+        }
+
+        console.info('[FrameFlow login] current host:', window.location.host);
+
+        const cfgEl = document.getElementById('login-debug-config');
+        let cfg = {};
+        try {
+            cfg = cfgEl ? JSON.parse(cfgEl.textContent || '{}') : {};
+        } catch (e) {
+            cfg = {};
+        }
+
+        if (cfg.domain) {
+            console.info('[FrameFlow login] cookie domain expected:', cfg.domain);
+        }
+        if (cfg.authServiceUrl) {
+            console.info('[FrameFlow login] auth service URL:', cfg.authServiceUrl);
+        }
+    })();
+</script>
+</body>
+</html>

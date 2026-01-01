@@ -1,0 +1,73 @@
+<div class="max-w-screen-md mx-auto">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Redigera prisgrupp: <%= priceGroup.name %></h2>
+        <%- include('../ui/button', { text: '← Tillbaka', href: '/price-groups', variant: 'secondary' }) %>
+    </div>
+
+    <%- include('../ui/card', { body: \`
+        <form method="POST" action="/price-groups/\${priceGroup.id}" class="space-y-6">
+            <%- include('../ui/form-group', { 
+                id: 'name', 
+                label: 'Namn', 
+                required: true,
+                body: include('../ui/input', { id: 'name', name: 'name', value: priceGroup.name, required: true, placeholder: 't.ex. A, B, Premium' })
+            }) %>
+
+            <%- include('../ui/form-group', { 
+                id: 'markup_percentage', 
+                label: 'Påslagsprocent', 
+                required: true,
+                body: \`
+                    <div class="relative">
+                        \${include('../ui/input', { id: 'markup_percentage', name: 'markup_percentage', type: 'number', step: '0.01', value: priceGroup.markup_percentage, required: true, placeholder: '200' })}
+                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">%</span>
+                    </div>
+                    <p class="mt-2 text-xs text-slate-500 italic">Exempel: 200% betyder försäljningspris = inköpspris × 2.00</p>
+                \`
+            }) %>
+
+            <%- include('../ui/form-group', { 
+                id: 'description', 
+                label: 'Beskrivning', 
+                body: include('../ui/textarea', { id: 'description', name: 'description', rows: 3, value: priceGroup.description || '', placeholder: 'Valfri beskrivning' })
+            }) %>
+
+            <div class="p-4 bg-amber-50 border border-amber-100 rounded-xl">
+                <label class="flex items-start gap-3 cursor-pointer">
+                    <input type="checkbox" name="update_items" value="true" checked class="mt-1 w-4 h-4 text-sky-600 border-slate-300 rounded focus:ring-sky-500">
+                    <div>
+                        <span class="block text-sm font-bold text-amber-900">Uppdatera alla artiklar i gruppen nu?</span>
+                        <span class="block text-xs text-amber-800 mt-1">
+                            Om markerat, kommer alla artiklar med prisgrupp "<%= priceGroup.name %>" att få sina försäljningspriser omräknade baserat på det nya påslaget.
+                        </span>
+                    </div>
+                </label>
+            </div>
+
+            <div class="bg-sky-50 border border-sky-100 rounded-xl p-4">
+                <h4 class="text-xs font-bold text-sky-700 uppercase tracking-wider mb-2">Förhandsvisning av beräkning</h4>
+                <p class="text-sm text-sky-800">
+                    Om påslaget är <span id="preview-markup" class="font-bold"><%= priceGroup.markup_percentage %></span>% och inköpspriset är 100 kr,<br>
+                    blir försäljningspriset <span id="preview-sales" class="font-bold"><%= (100 * priceGroup.markup_percentage / 100).toFixed(2) %></span> kr.
+                </p>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-6 border-t border-slate-100">
+                <%- include('../ui/button', { text: 'Avbryt', href: '/price-groups', variant: 'secondary' }) %>
+                <%- include('../ui/button', { text: 'Uppdatera prisgrupp', type: 'submit', variant: 'primary' }) %>
+            </div>
+        </form>
+    \`, noPadding: false }) %>
+</div>
+
+<script>
+    document.getElementById('markup_percentage').addEventListener('input', function() {
+        const markup = parseFloat(this.value) || 0;
+        const purchasePrice = 100;
+        const salesPrice = (purchasePrice * markup / 100).toFixed(2);
+        
+        document.getElementById('preview-markup').textContent = markup.toFixed(2);
+        document.getElementById('preview-sales').textContent = salesPrice;
+    });
+</script>

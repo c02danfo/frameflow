@@ -1,0 +1,64 @@
+<div class="max-w-screen-md mx-auto">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Ny order</h2>
+        <a href="/orders" class="inline-flex items-center px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 text-sm font-medium rounded-lg transition-colors">
+            ← Tillbaka
+        </a>
+    </div>
+
+    <% if (locals.error) { %>
+    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm font-medium">
+        <%= error %>
+    </div>
+    <% } %>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden p-6">
+        <form method="POST" action="/orders" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label for="customer_id" class="block text-sm font-medium text-gray-700">
+                        Kund<span class="text-red-500 ml-1">*</span>
+                    </label>
+                    <select name="customer_id" id="customer_id" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all bg-white">
+                        <option value="">Välj kund...</option>
+                        <% customers.forEach(customer => { %>
+                        <option value="<%= customer.id %>"><%= customer.name %></option>
+                        <% }); %>
+                    </select>
+                    <p class="text-xs text-gray-500">Välj en befintlig kund eller <a href="/customers/new" class="text-sky-600 hover:underline font-semibold">skapa en ny</a></p>
+                </div>
+                
+                <div class="space-y-2">
+                    <label for="order_date" class="block text-sm font-medium text-gray-700">
+                        Orderdatum
+                    </label>
+                    <input type="date" id="order_date" name="order_date" value="<%= new Date().toISOString().split('T')[0] %>" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all">
+                </div>
+            </div>
+            
+            <div class="space-y-2">
+                <label for="delivery_date" class="block text-sm font-medium text-gray-700">
+                    Leveransdatum
+                </label>
+                <input type="date" id="delivery_date" name="delivery_date" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all">
+            </div>
+            
+            <div class="space-y-2">
+                <label for="notes" class="block text-sm font-medium text-gray-700">
+                    Anteckningar
+                </label>
+                <textarea id="notes" name="notes" rows="3" placeholder="Eventuella instruktioner..." class="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all resize-y"></textarea>
+            </div>
+            
+            <div class="flex items-center justify-end gap-3 pt-6 border-t border-slate-100">
+                <a href="/orders" class="inline-flex items-center px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 text-sm font-medium rounded-lg transition-colors">
+                    Avbryt
+                </a>
+                <button type="submit" class="inline-flex items-center px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
+                    Skapa order
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
