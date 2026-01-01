@@ -38,3 +38,7 @@ logs/
 .idea/
 ~
 docker-compose.local.override.yml
+
+# Uploads / runtime files
+inventory-artyx/backend/uploads/
+**/uploads/
