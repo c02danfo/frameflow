@@ -1,0 +1,39 @@
+~# --- OS ---
+.DS_Store
+Thumbs.db
+
+# --- Node ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- Environment variables ---
+.env
+.env.*
+!.env.example
+!.env.production.template
+
+# --- Build output ---
+dist/
+build/
+
+# --- Docker ---
+docker-compose.override.yml
+
+# --- Database / data ---
+*.sql.dump
+*.dump
+*.bak
+postgres-data/
+db-data/
+**/data/
+
+# --- Logs ---
+logs/
+*.log
+
+# --- Editor ---
+.vscode/
+.idea/
+~
