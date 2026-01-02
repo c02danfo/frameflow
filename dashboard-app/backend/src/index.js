@@ -1,6 +1,7 @@
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
+const fs = require('fs');
 const dotenv = require('dotenv');
 
 dotenv.config({ path: path.join(__dirname, '..', '.env') });
@@ -23,25 +24,57 @@ app.set('trust proxy', 1);
 
 // View engine setup - include shared design-system components (mounted at /app/public/design-system)
 app.set('view engine', 'ejs');
+
+const publicDesignSystemPath = path.join(__dirname, '..', 'public', 'design-system');
+const repoDesignSystemPath = path.join(__dirname, '..', '..', '..', 'design-system');
+const designSystemPath = fs.existsSync(publicDesignSystemPath)
+  ? publicDesignSystemPath
+  : repoDesignSystemPath;
+
 app.set('views', [
   path.join(__dirname, 'views'),
-  path.join(__dirname, '../public/design-system/components')
+  path.join(designSystemPath, 'components')
 ]);
 
 // Static files - design-system mounted at /design-system for layout asset paths
-const designSystemPath = path.join(__dirname, '../public/design-system');
 app.use('/design-system', express.static(designSystemPath));
 // Backwards-compatible aliases used by login page
 app.use('/css', express.static(path.join(designSystemPath, 'css')));
 app.use('/js', express.static(path.join(designSystemPath, 'js')));
 
+// Helper: compute service base URLs from environment
+const getServiceBaseUrls = () => {
+  const domain = process.env.DOMAIN || 'frameflowapp.com';
+  const isLocal = domain === 'localhost' || domain.includes('127.0.0.1');
+  
+  if (isLocal) {
+    // Local development: use specific ports
+    return {
+      dashboardBaseUrl: `http://localhost:${process.env.DASHBOARD_PORT || 3010}`,
+      framingBaseUrl: `http://localhost:${process.env.FRAMING_PORT || 3011}`,
+      inventoryBaseUrl: `http://localhost:${process.env.INVENTORY_PORT || 3015}`,
+      authBaseUrl: `http://localhost:${process.env.AUTH_PORT || 3005}`
+    };
+  } else {
+    // Production: use subdomains
+    return {
+      dashboardBaseUrl: `https://dashboard.${domain}`,
+      framingBaseUrl: `https://framing.${domain}`,
+      inventoryBaseUrl: `https://inventory.${domain}`,
+      authBaseUrl: `https://auth.${domain}`
+    };
+  }
+};
+
 // Layout helper: render view inside shared layout
 app.use((req, res, next) => {
   res.renderWithLayout = (view, data = {}) => {
-    // Ensure user and domain are always available for the layout/navbar
+    // Ensure user, domain, and service URLs are always available for the layout/navbar
+    const serviceUrls = getServiceBaseUrls();
     const viewData = Object.assign({
       user: req.session?.user || null,
-      domain: process.env.DOMAIN || 'frameflowapp.com'
+      domain: process.env.DOMAIN || 'frameflowapp.com',
+      ...serviceUrls
     }, data);
 
     req.app.render(view, viewData, (err, html) => {
