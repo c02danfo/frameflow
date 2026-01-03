@@ -4,11 +4,11 @@ require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 // Main framing app database
 const pool = new Pool({
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  database: process.env.DB_NAME,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
+  host: process.env.FRAMING_DB_HOST || process.env.DB_HOST,
+  port: process.env.FRAMING_DB_PORT || process.env.DB_PORT,
+  database: process.env.FRAMING_DB_NAME || process.env.DB_NAME,
+  user: process.env.FRAMING_DB_USER || process.env.DB_USER,
+  password: process.env.FRAMING_DB_PASSWORD || process.env.DB_PASSWORD,
   connectionTimeoutMillis: Number(process.env.DB_CONNECT_TIMEOUT_MS) || 5000,
   idleTimeoutMillis: 10000,
   max: 5,

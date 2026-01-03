@@ -9,11 +9,11 @@ const connectTimeout = Number(process.env.DB_CONNECT_TIMEOUT_MS) || 5000;
 const pool = connectionString
   ? new Pool({ connectionString, connectionTimeoutMillis: connectTimeout })
   : new Pool({
-      host: process.env.DB_HOST || 'localhost',
-      port: Number(process.env.DB_PORT) || 5432,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
+      host: process.env.INVENTORY_DB_HOST || process.env.DB_HOST || 'localhost',
+      port: Number(process.env.INVENTORY_DB_PORT || process.env.DB_PORT) || 5434,
+      user: process.env.INVENTORY_DB_USER || process.env.DB_USER,
+      password: process.env.INVENTORY_DB_PASSWORD || process.env.DB_PASSWORD,
+      database: process.env.INVENTORY_DB_NAME || process.env.DB_NAME,
       connectionTimeoutMillis: connectTimeout,
     });
 

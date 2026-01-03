@@ -1,9 +1,13 @@
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const session = require('express-session');
 const { Pool } = require('pg');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
+
+// Load environment variables from ../.env
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 const app = express();
 const PORT = process.env.PORT || 3005;

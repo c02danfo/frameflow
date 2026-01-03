@@ -56,12 +56,12 @@ const getServiceBaseUrls = () => {
       authBaseUrl: `http://localhost:${process.env.AUTH_PORT || 3005}`
     };
   } else {
-    // Production: use subdomains
+    // Production: use subdomains (dashboard is on apex domain per Caddy config)
     return {
-      dashboardBaseUrl: `https://dashboard.${domain}`,
+      dashboardBaseUrl: `https://frameflowapp.com`,
       framingBaseUrl: `https://framing.${domain}`,
       inventoryBaseUrl: `https://inventory.${domain}`,
-      authBaseUrl: `https://auth.${domain}`
+      authBaseUrl: `https://frameflowapp.com`
     };
   }
 };

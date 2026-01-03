@@ -1,6 +1,7 @@
 <%- /* 
-Navbar Component - Shared navigation bar for all apps
+Navbar Component - Shared navigation bar with dropdowns for all apps
 Modern grey design with responsive mobile menu
+Expects: user, domain, dashboardBaseUrl, inventoryBaseUrl, framingBaseUrl, authBaseUrl
 */ -%>
 
 <nav class="bg-slate-800 shadow-lg">
@@ -9,37 +10,94 @@ Modern grey design with responsive mobile menu
             <!-- Logo and main nav -->
             <div class="flex">
                 <div class="flex-shrink-0 flex items-center">
-                    <a href="https://<%= domain || 'frameflowapp.com' %>/dashboard" class="flex items-center gap-2">
+                    <a href="<%= dashboardBaseUrl || 'https://frameflowapp.com' %>/dashboard" class="flex items-center gap-2">
                         <span class="text-2xl font-bold text-white">Frame<span class="text-sky-400">Flow</span></span>
                     </a>
                 </div>
                 
-                <!-- Desktop navigation -->
+                <!-- Desktop navigation with dropdowns -->
                 <% if (user) { %>
                 <div class="hidden md:ml-8 md:flex md:space-x-1">
-                    <a href="https://<%= domain || 'frameflowapp.com' %>/dashboard" 
+                    <!-- Hem -->
+                    <a href="<%= dashboardBaseUrl || 'https://frameflowapp.com' %>/dashboard" 
                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-slate-700 rounded-md transition-colors">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                         </svg>
-                        Översikt
+                        Hem
                     </a>
                     
-                    <a href="https://inventory.<%= domain || 'frameflowapp.com' %>" 
-                       class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-slate-700 rounded-md transition-colors">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                        </svg>
-                        Lager & Artiklar
-                    </a>
+                    <!-- Artiklar dropdown -->
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" @click.away="open = false"
+                                class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-slate-700 rounded-md transition-colors">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                            </svg>
+                            Artiklar
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+                        <div x-show="open" x-transition
+                             class="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-slate-700 ring-1 ring-black ring-opacity-5 z-50">
+                            <div class="py-1">
+                                <a href="<%= inventoryBaseUrl || 'https://inventory.frameflowapp.com' %>/items" 
+                                   class="block px-4 py-2 text-sm text-gray-300 hover:bg-slate-600 hover:text-white">Artiklar</a>
+                                <a href="<%= inventoryBaseUrl || 'https://inventory.frameflowapp.com' %>/items/new" 
+                                   class="block px-4 py-2 text-sm text-gray-300 hover:bg-slate-600 hover:text-white">Ny artikel</a>
+                            </div>
+                        </div>
+                    </div>
                     
-                    <a href="https://framing.<%= domain || 'frameflowapp.com' %>" 
-                       class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-slate-700 rounded-md transition-colors">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
-                        </svg>
-                        Inramning & Order
-                    </a>
+                    <!-- Order dropdown -->
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" @click.away="open = false"
+                                class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-slate-700 rounded-md transition-colors">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
+                            </svg>
+                            Order
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+                        <div x-show="open" x-transition
+                             class="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-slate-700 ring-1 ring-black ring-opacity-5 z-50">
+                            <div class="py-1">
+                                <a href="<%= framingBaseUrl || 'https://framing.frameflowapp.com' %>/orders" 
+                                   class="block px-4 py-2 text-sm text-gray-300 hover:bg-slate-600 hover:text-white">Ordrar</a>
+                                <a href="<%= framingBaseUrl || 'https://framing.frameflowapp.com' %>/orders/new" 
+                                   class="block px-4 py-2 text-sm text-gray-300 hover:bg-slate-600 hover:text-white">Ny order</a>
+                                <a href="<%= framingBaseUrl || 'https://framing.frameflowapp.com' %>/customers" 
+                                   class="block px-4 py-2 text-sm text-gray-300 hover:bg-slate-600 hover:text-white">Kunder</a>
+                                <a href="<%= framingBaseUrl || 'https://framing.frameflowapp.com' %>/customers/new" 
+                                   class="block px-4 py-2 text-sm text-gray-300 hover:bg-slate-600 hover:text-white">Ny kund</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Inställningar dropdown -->
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" @click.away="open = false"
+                                class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-slate-700 rounded-md transition-colors">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            Inställningar
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+                        <div x-show="open" x-transition
+                             class="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-slate-700 ring-1 ring-black ring-opacity-5 z-50">
+                            <div class="py-1">
+                                <a href="<%= framingBaseUrl || 'https://framing.frameflowapp.com' %>/company-data" 
+                                   class="block px-4 py-2 text-sm text-gray-300 hover:bg-slate-600 hover:text-white">Företagsdata</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <% } %>
             </div>
@@ -59,7 +117,7 @@ Modern grey design with responsive mobile menu
                             </div>
                         </div>
                         
-                        <a href="https://<%= domain || 'frameflowapp.com' %>/auth/logout" 
+                        <a href="<%= dashboardBaseUrl || 'https://frameflowapp.com' %>/auth/logout" 
                            class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-slate-600 hover:bg-slate-500 rounded-md transition-colors">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
@@ -78,7 +136,7 @@ Modern grey design with responsive mobile menu
                         </button>
                     </div>
                 <% } else { %>
-                    <a href="https://<%= domain || 'frameflowapp.com' %>/auth/login" 
+                    <a href="<%= dashboardBaseUrl || 'https://frameflowapp.com' %>/auth/login" 
                        class="inline-flex items-center px-4 py-2 text-sm font-bold text-white bg-sky-600 hover:bg-sky-500 rounded-md transition-colors shadow-sm">
                         Logga in
                     </a>
@@ -91,17 +149,43 @@ Modern grey design with responsive mobile menu
     <% if (user) { %>
     <div id="mobile-menu" class="hidden sm:hidden bg-slate-900">
         <div class="px-2 pt-2 pb-3 space-y-1">
-            <a href="https://<%= domain || 'frameflowapp.com' %>/dashboard" 
+            <a href="<%= dashboardBaseUrl || 'https://frameflowapp.com' %>/dashboard" 
                class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-slate-800">
-                Översikt
+                Hem
             </a>
-            <a href="https://inventory.<%= domain || 'frameflowapp.com' %>" 
-               class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-slate-800">
-                Lager & Artiklar
+            
+            <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Artiklar</div>
+            <a href="<%= inventoryBaseUrl || 'https://inventory.frameflowapp.com' %>/items" 
+               class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-slate-800 pl-6">
+                Artiklar
             </a>
-            <a href="https://framing.<%= domain || 'frameflowapp.com' %>" 
-               class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-slate-800">
-                Inramning & Order
+            <a href="<%= inventoryBaseUrl || 'https://inventory.frameflowapp.com' %>/items/new" 
+               class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-slate-800 pl-6">
+                Ny artikel
+            </a>
+            
+            <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Order</div>
+            <a href="<%= framingBaseUrl || 'https://framing.frameflowapp.com' %>/orders" 
+               class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-slate-800 pl-6">
+                Ordrar
+            </a>
+            <a href="<%= framingBaseUrl || 'https://framing.frameflowapp.com' %>/orders/new" 
+               class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-slate-800 pl-6">
+                Ny order
+            </a>
+            <a href="<%= framingBaseUrl || 'https://framing.frameflowapp.com' %>/customers" 
+               class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-slate-800 pl-6">
+                Kunder
+            </a>
+            <a href="<%= framingBaseUrl || 'https://framing.frameflowapp.com' %>/customers/new" 
+               class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-slate-800 pl-6">
+                Ny kund
+            </a>
+            
+            <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Inställningar</div>
+            <a href="<%= framingBaseUrl || 'https://framing.frameflowapp.com' %>/company-data" 
+               class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-slate-800 pl-6">
+                Företagsdata
             </a>
         </div>
         <div class="pt-4 pb-3 border-t border-slate-700">
@@ -110,7 +194,7 @@ Modern grey design with responsive mobile menu
                 <div class="text-sm font-medium text-gray-400"><%= user.email %></div>
             </div>
             <div class="px-2">
-                <a href="https://<%= domain || 'frameflowapp.com' %>/auth/logout" 
+                <a href="<%= dashboardBaseUrl || 'https://frameflowapp.com' %>/auth/logout" 
                    class="block px-3 py-2 rounded-md text-base font-medium text-white bg-slate-600 hover:bg-slate-500">
                     Logga ut
                 </a>

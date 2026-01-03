@@ -3,11 +3,20 @@ const fetch = require('node-fetch');
 const { authServiceCall } = require('../utils/authServiceMiddleware');
 
 const router = express.Router();
-const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://auth-service:3005';
+
+// Resolve auth-service base URL for local vs production
+const domain = process.env.DOMAIN || 'frameflowapp.com';
+const isLocal = domain === 'localhost' || domain.includes('127.0.0.1');
+const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || (
+  isLocal
+    ? `http://localhost:${process.env.AUTH_PORT || 3005}`
+    : 'http://auth-service:3005'
+);
 
 // Login page
 router.get('/login', (req, res) => {
-  res.render('auth/login', { 
+  // Use shared layout so navbar receives environment-aware URLs
+  res.renderWithLayout('auth/login', { 
     error: req.query.error,
     returnTo: req.query.returnTo || ''
   });

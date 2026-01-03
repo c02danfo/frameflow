@@ -63,13 +63,39 @@ app.use(createSessionMiddleware({
   secret: process.env.SESSION_SECRET
 }));
 
+// Helper: compute service base URLs from environment
+const getServiceBaseUrls = () => {
+  const domain = process.env.DOMAIN || 'frameflowapp.com';
+  const isLocal = domain === 'localhost' || domain.includes('127.0.0.1');
+  
+  if (isLocal) {
+    // Local development: use specific ports
+    return {
+      dashboardBaseUrl: `http://localhost:${process.env.DASHBOARD_PORT || 3010}`,
+      framingBaseUrl: `http://localhost:${process.env.FRAMING_PORT || 3011}`,
+      inventoryBaseUrl: `http://localhost:${process.env.INVENTORY_PORT || 3015}`,
+      authBaseUrl: `http://localhost:${process.env.AUTH_PORT || 3005}`
+    };
+  } else {
+    // Production: use subdomains
+    return {
+      dashboardBaseUrl: `https://frameflowapp.com`,
+      framingBaseUrl: `https://framing.${domain}`,
+      inventoryBaseUrl: `https://inventory.${domain}`,
+      authBaseUrl: `https://frameflowapp.com`
+    };
+  }
+};
+
 // Custom renderWithLayout middleware - pass auth user to all views
 app.use((req, res, next) => {
   res.renderWithLayout = function(view, data = {}) {
     // Lägg till session data till alla views
+    const serviceUrls = getServiceBaseUrls();
     const viewData = Object.assign({}, data, {
       user: req.session.user || null,
-      domain: process.env.DOMAIN || 'frameflowapp.com'
+      domain: process.env.DOMAIN || 'frameflowapp.com',
+      ...serviceUrls
     });
     
     req.app.render(view, viewData, (err, html) => {
