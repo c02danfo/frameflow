@@ -824,10 +824,30 @@ router.post('/', upload.array('images', 5), async (req, res, next) => {
   }
 });
 
+// DELETE /items/:id - ta bort artikel (MÅSTE komma före /:id route!)
+router.post('/:id/delete', async (req, res, next) => {
+  try {
+    // Delete associated images from filesystem
+    deleteItemImages(req.params.id);
+    
+    // Delete from database (CASCADE will delete item_images records)
+    await db.query('DELETE FROM items WHERE id = $1', [req.params.id]);
+    res.redirect('/items');
+  } catch (err) {
+    next(err);
+  }
+});
+
 // POST /items/:id - uppdatera artikel
-router.post('/:id', async (req, res, next) => {
+router.post('/:id', upload.array('images', 5), async (req, res, next) => {
   try {
     let { name, category, unit, purchase_price, sales_price, price_group, supplier, supplier_item_number, quantity, add_quantity, stock_unit, sales_unit, unit_size, dim_width, dim_height, dim_length, dim_thickness, dim_unit, color } = req.body;
+
+    // Validate required fields
+    if (!name || !name.toString().trim()) {
+      return res.status(400).send('Name is required');
+    }
+    name = name.toString().trim();
 
     // Get current item to check if purchase_price changed
     const currentItem = await db.query('SELECT purchase_price, price_group FROM items WHERE id = $1', [req.params.id]);
@@ -868,20 +888,6 @@ router.post('/:id', async (req, res, next) => {
       `UPDATE items SET name = $1, category = $2, unit = $3, purchase_price = $4, sales_price = $5, price_group = $6, supplier = $7, supplier_item_number = $8, quantity = $9, stock_unit = $10, sales_unit = $11, unit_size = $12, unit_dimensions = $13, color = $14 WHERE id = $15`,
       [name, category || null, unit || null, purchase_price || null, sales_price || null, price_group || null, supplier || null, supplier_item_number || null, newQuantity, stock_unit || null, sales_unit || null, unit_size || null, unit_dimensions ? JSON.stringify(unit_dimensions) : null, color || null, req.params.id]
     );
-    res.redirect('/items');
-  } catch (err) {
-    next(err);
-  }
-});
-
-// DELETE /items/:id - ta bort artikel
-router.post('/:id/delete', async (req, res, next) => {
-  try {
-    // Delete associated images from filesystem
-    deleteItemImages(req.params.id);
-    
-    // Delete from database (CASCADE will delete item_images records)
-    await db.query('DELETE FROM items WHERE id = $1', [req.params.id]);
     res.redirect('/items');
   } catch (err) {
     next(err);

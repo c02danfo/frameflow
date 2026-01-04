@@ -75,6 +75,19 @@ CREATE TABLE IF NOT EXISTS price_groups (
 CREATE UNIQUE INDEX IF NOT EXISTS idx_items_barcode_unique
   ON items(barcode) WHERE barcode IS NOT NULL;
 
+-- Item images table for product photos
+CREATE TABLE IF NOT EXISTS item_images (
+  id SERIAL PRIMARY KEY,
+  item_id INTEGER NOT NULL REFERENCES items(id) ON DELETE CASCADE,
+  filename VARCHAR(255) NOT NULL,
+  original_filename VARCHAR(255),
+  display_order INTEGER DEFAULT 0,
+  is_primary BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_item_images_item_id ON item_images(item_id);
+
 -- Helper tabell för kategori-prefix och SKU-räknare
 CREATE TABLE IF NOT EXISTS category_prefixes (
   category        TEXT PRIMARY KEY,
