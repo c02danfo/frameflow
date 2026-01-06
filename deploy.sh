@@ -1,10 +1,10 @@
 #!/bin/bash
-# Quick deployment script for FrameFlow production
-
 set -e
 
 echo "🚀 FrameFlow Production Deployment"
 echo "===================================="
+
+cd /OnlineApps
 
 # Check if .env.production exists
 if [ ! -f .env.production ]; then
@@ -13,37 +13,41 @@ if [ ! -f .env.production ]; then
     exit 1
 fi
 
-# Load environment
-export $(cat .env.production | grep -v '^#' | xargs)
+# Load env
+export $(grep -v '^#' .env.production | xargs)
 
-# Verify SESSION_SECRET is set
-if [ -z "$SESSION_SECRET" ] || [ "$SESSION_SECRET" = "GENERATE_STRONG_SECRET_HERE_128_CHARS" ]; then
-    echo "❌ SESSION_SECRET not configured in .env.production"
-    exit 1
+# Safety check
+if [ -z "$SESSION_SECRET" ] || [[ "$SESSION_SECRET" == *"GENERATE"* ]]; then
+  echo "❌ SESSION_SECRET not configured"
+  exit 1
 fi
 
-echo "✅ Environment loaded"
+echo "✅ Environment OK"
 
-# Pull latest changes (if in git)
+# Pull latest code
 if [ -d .git ]; then
-    echo "📥 Pulling latest changes..."
-    git pull
+  echo "📥 Pulling latest changes..."
+  git pull origin main
 fi
 
-# Build and deploy
+# Hard restart
+echo "🛑 Stopping containers..."
+docker compose -f docker-compose.production.yml down
+
 echo "🔨 Building containers..."
 docker compose -f docker-compose.production.yml build
 
-echo "🚢 Starting services..."
+echo "🚢 Starting containers..."
 docker compose -f docker-compose.production.yml up -d
 
 # Wait for services to be healthy
 echo "⏳ Waiting for services to be healthy..."
 sleep 10
 
-# Check status
+
+# Status
 echo ""
-echo "📊 Service Status:"
+echo "📊 Service status:"
 docker compose -f docker-compose.production.yml ps
 
 echo ""

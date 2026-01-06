@@ -19,8 +19,18 @@ COPY ./design-system/components /app/public/design-system/components
 COPY ./design-system/css /app/public/design-system/css
 COPY ./design-system/js /app/public/design-system/js
 
+# Copy design-system for EJS includes (layout.ejs expects ../../../../design-system/)
+COPY ./design-system /design-system
+
 # Expose the port
 EXPOSE 3000
 
 # Start the application
 CMD ["npm", "start"]
+
+
+
+# Copy design-system for EJS includes (layout.ejs expects ../../../../design-system/)
+COPY ./design-system /design-system
+
+# Expose the port
