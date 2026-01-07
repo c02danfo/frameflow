@@ -15,10 +15,11 @@ const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || (
 
 // Login page
 router.get('/login', (req, res) => {
-  // Use shared layout so navbar receives environment-aware URLs
-  res.renderWithLayout('auth/login', { 
+  // Render without layout to avoid navbar on login page
+  res.render('auth/login', { 
     error: req.query.error,
-    returnTo: req.query.returnTo || ''
+    returnTo: req.query.returnTo || '',
+    title: 'Logga in'
   });
 });
 
