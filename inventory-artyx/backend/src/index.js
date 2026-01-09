@@ -24,6 +24,7 @@ const { createSessionMiddleware } = require('../../../shared/middleware/sessionS
 const db = require('./db');
 const itemsRouter = require('./routes/items');
 const priceGroupsRouter = require('./routes/price-groups');
+const servicesRouter = require('./routes/services');
 const { requireAuth } = require('./utils/authServiceMiddleware');
 
 const app = express();
@@ -107,6 +108,8 @@ app.use((req, res, next) => {
 // Protected routes - all require auth
 app.use('/items', requireAuth, itemsRouter);
 app.use('/price-groups', requireAuth, priceGroupsRouter);
+app.use('/services', requireAuth, servicesRouter);
+app.use('/services', requireAuth, servicesRouter);
 
 app.get('/', requireAuth, (req, res) => {
   res.redirect('/items');

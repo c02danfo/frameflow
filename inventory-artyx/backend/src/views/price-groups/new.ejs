@@ -1,37 +1,41 @@
-<div class="max-w-screen-md mx-auto">
+<div class="max-w-screen-md mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
         <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Ny prisgrupp</h2>
-        <%- include('../ui/button', { text: '← Tillbaka', href: '/price-groups', variant: 'secondary' }) %>
+        <a href="/price-groups" class="text-sky-600 hover:text-sky-700 text-sm font-medium">
+            ← Tillbaka
+        </a>
     </div>
 
-    <%- include('../ui/card', { body: \`
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
         <form method="POST" action="/price-groups" class="space-y-6">
-            <%- include('../ui/form-group', { 
-                id: 'name', 
-                label: 'Namn', 
-                required: true,
-                body: include('../ui/input', { id: 'name', name: 'name', required: true, placeholder: 't.ex. A, B, Premium' })
-            }) %>
+            <div class="space-y-1">
+                <label for="name" class="block text-sm font-semibold text-slate-700">
+                    Namn <span class="text-red-500">*</span>
+                </label>
+                <input type="text" id="name" name="name" required placeholder="t.ex. A, B, Premium"
+                       class="block w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+            </div>
 
-            <%- include('../ui/form-group', { 
-                id: 'markup_percentage', 
-                label: 'Påslagsprocent', 
-                required: true,
-                body: \`
-                    <div class="relative">
-                        \${include('../ui/input', { id: 'markup_percentage', name: 'markup_percentage', type: 'number', step: '0.01', required: true, placeholder: '200' })}
-                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">%</span>
-                    </div>
-                    <p class="mt-2 text-xs text-slate-500 italic">Exempel: 200% betyder försäljningspris = inköpspris × 2.00</p>
-                \`
-            }) %>
+            <div class="space-y-1">
+                <label for="markup_percentage" class="block text-sm font-semibold text-slate-700">
+                    Påslagsprocent <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    <input type="number" id="markup_percentage" name="markup_percentage" step="0.01" required placeholder="200"
+                           class="block w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">%</span>
+                </div>
+                <p class="mt-2 text-xs text-slate-500 italic">Exempel: 200% betyder försäljningspris = inköpspris × 2.00</p>
+            </div>
 
-            <%- include('../ui/form-group', { 
-                id: 'description', 
-                label: 'Beskrivning', 
-                body: include('../ui/textarea', { id: 'description', name: 'description', rows: 3, placeholder: 'Valfri beskrivning' })
-            }) %>
+            <div class="space-y-1">
+                <label for="description" class="block text-sm font-semibold text-slate-700">
+                    Beskrivning
+                </label>
+                <textarea id="description" name="description" rows="3" placeholder="Valfri beskrivning..."
+                          class="block w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"></textarea>
+            </div>
 
             <div class="bg-sky-50 border border-sky-100 rounded-xl p-4">
                 <h4 class="text-xs font-bold text-sky-700 uppercase tracking-wider mb-2">Förhandsvisning av beräkning</h4>
@@ -42,11 +46,15 @@
             </div>
 
             <div class="flex items-center justify-end gap-3 pt-6 border-t border-slate-100">
-                <%- include('../ui/button', { text: 'Avbryt', href: '/price-groups', variant: 'secondary' }) %>
-                <%- include('../ui/button', { text: 'Skapa prisgrupp', type: 'submit', variant: 'primary' }) %>
+                <a href="/price-groups" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors">
+                    Avbryt
+                </a>
+                <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-sky-600 hover:bg-sky-700 rounded-lg transition-colors">
+                    Skapa prisgrupp
+                </button>
             </div>
         </form>
-    \`, noPadding: false }) %>
+    </div>
 </div>
 
 <script>

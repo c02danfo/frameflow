@@ -1,0 +1,182 @@
+<div class="bg-gray-50 min-h-screen">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Header -->
+        <div class="mb-6">
+            <a href="/services" class="text-sky-600 hover:text-sky-700 text-sm font-medium mb-2 inline-block">
+                ← Tillbaka till tjänster
+            </a>
+            <h2 class="text-3xl font-bold text-gray-900">Ny tjänst</h2>
+            <p class="text-sm text-gray-600 mt-1">Skapa en ny tjänst för inramning</p>
+        </div>
+
+        <% if (error) { %>
+            <div class="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+                <% if (error === 'name_required') { %>
+                    Namn är obligatoriskt
+                <% } else if (error === 'invalid_pricing_model') { %>
+                    Ogiltig prissättningsmodell
+                <% } else { %>
+                    <%= error %>
+                <% } %>
+            </div>
+        <% } %>
+
+        <!-- Form -->
+        <form method="POST" action="/services" class="bg-white rounded-lg shadow-sm p-6 space-y-6">
+            <!-- Basic Information -->
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Grundinformation</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Namn <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" name="name" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                               placeholder="T.ex. Glasbyte, Montage av canvasdukt">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+                        <input type="text" name="category" list="category-list"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                               placeholder="T.ex. Glasbyte, Montage">
+                        <datalist id="category-list">
+                            <% categories.forEach(cat => { %>
+                                <option value="<%= cat %>">
+                            <% }) %>
+                        </datalist>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Beskrivning</label>
+                        <textarea name="description" rows="3"
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                                  placeholder="Beskriv tjänsten..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pricing -->
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Prissättning</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Prissättningsmodell <span class="text-red-500">*</span>
+                        </label>
+                        <select name="pricing_model" id="pricing_model" required onchange="updatePricingFields()"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500">
+                            <option value="fixed">Fast pris</option>
+                            <option value="hourly">Timpris</option>
+                            <option value="per_unit">Per enhet</option>
+                            <option value="base_plus_hourly">Bas + timpris</option>
+                        </select>
+                    </div>
+
+                    <div id="base_price_field">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Fast pris (kr)</label>
+                        <input type="number" name="base_price" step="0.01" min="0"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                               placeholder="0.00">
+                    </div>
+
+                    <div id="hourly_rate_field" style="display: none;">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Timpris (kr/timme)</label>
+                        <input type="number" name="hourly_rate" step="0.01" min="0"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                               placeholder="0.00">
+                    </div>
+
+                    <div id="price_per_unit_field" style="display: none;">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Pris per enhet (kr)</label>
+                        <input type="number" name="price_per_unit" step="0.01" min="0"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                               placeholder="0.00">
+                    </div>
+
+                    <div id="unit_type_field" style="display: none;">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Enhetstyp</label>
+                        <input type="text" name="unit_type"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                               placeholder="T.ex. cm, dm², st">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Intern kostnad per timme (kr)</label>
+                        <input type="number" name="internal_cost_per_hour" step="0.01" min="0"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                               placeholder="0.00">
+                        <p class="text-xs text-gray-500 mt-1">För marginalkalkyl</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Time Estimation -->
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Tidsestimering</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Standard tid (minuter)</label>
+                        <input type="number" name="default_duration_minutes" min="0"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                               placeholder="0">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Anteckningar</h3>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Interna anteckningar</label>
+                    <textarea name="internal_notes" rows="3"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                              placeholder="Interna anteckningar..."></textarea>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex justify-end gap-3 pt-4 border-t">
+                <a href="/services" class="px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors">
+                    Avbryt
+                </a>
+                <button type="submit" class="px-6 py-2 bg-sky-600 hover:bg-sky-700 text-white font-medium rounded-lg transition-colors">
+                    Skapa tjänst
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function updatePricingFields() {
+    const model = document.getElementById('pricing_model').value;
+    const baseField = document.getElementById('base_price_field');
+    const hourlyField = document.getElementById('hourly_rate_field');
+    const unitField = document.getElementById('price_per_unit_field');
+    const unitTypeField = document.getElementById('unit_type_field');
+    
+    // Hide all first
+    baseField.style.display = 'none';
+    hourlyField.style.display = 'none';
+    unitField.style.display = 'none';
+    unitTypeField.style.display = 'none';
+    
+    // Show relevant fields
+    if (model === 'fixed') {
+        baseField.style.display = 'block';
+    } else if (model === 'hourly') {
+        hourlyField.style.display = 'block';
+    } else if (model === 'per_unit') {
+        unitField.style.display = 'block';
+        unitTypeField.style.display = 'block';
+    } else if (model === 'base_plus_hourly') {
+        baseField.style.display = 'block';
+        hourlyField.style.display = 'block';
+    }
+}
+
+// Initialize on page load
+updatePricingFields();
+</script>

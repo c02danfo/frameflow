@@ -1,0 +1,127 @@
+<div class="bg-gray-50 min-h-screen">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Header -->
+        <div class="mb-6">
+            <a href="/services" class="text-sky-600 hover:text-sky-700 text-sm font-medium mb-2 inline-block">
+                ← Tillbaka till tjänster
+            </a>
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-900"><%= service.name %></h2>
+                    <div class="flex items-center gap-4 mt-1">
+                        <p class="text-sm text-gray-600">SKU: <%= service.sku || 'Ej genererad' %></p>
+                        <% if (service.barcode) { %>
+                            <p class="text-sm text-gray-600">Barcode: <%= service.barcode %></p>
+                        <% } %>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <a href="/services/<%= service.id %>/edit" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg transition-colors">
+                        Redigera
+                    </a>
+                    <form method="POST" action="/services/<%= service.id %>/delete" class="inline" onsubmit="return confirm('Är du säker på att du vill radera denna tjänst?')">
+                        <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors">
+                            Radera
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Service Details -->
+        <div class="bg-white rounded-lg shadow-sm p-6 space-y-6">
+            <!-- Basic Information -->
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Grundinformation</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="md:col-span-2">
+                        <p class="text-sm text-gray-600 mb-1">Kategori</p>
+                        <p class="text-base font-medium text-gray-900"><%= service.category || '-' %></p>
+                    </div>
+                    <div class="md:col-span-2">
+                        <p class="text-sm text-gray-600 mb-1">Beskrivning</p>
+                        <p class="text-base text-gray-900"><%= service.description || '-' %></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pricing -->
+            <div class="border-t pt-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Prissättning</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Prissättningsmodell</p>
+                        <p class="text-base font-medium text-gray-900">
+                            <% if (service.pricing_model === 'fixed') { %>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded text-sm font-medium bg-green-100 text-green-800">Fast pris</span>
+                            <% } else if (service.pricing_model === 'hourly') { %>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded text-sm font-medium bg-blue-100 text-blue-800">Timpris</span>
+                            <% } else if (service.pricing_model === 'per_unit') { %>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded text-sm font-medium bg-purple-100 text-purple-800">Per enhet</span>
+                            <% } else if (service.pricing_model === 'base_plus_hourly') { %>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded text-sm font-medium bg-orange-100 text-orange-800">Bas + timpris</span>
+                            <% } %>
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Pris</p>
+                        <p class="text-xl font-bold text-gray-900">
+                            <% if (service.pricing_model === 'fixed') { %>
+                                <%= service.base_price ? service.base_price.toLocaleString('sv-SE', { minimumFractionDigits: 2 }) + ' kr' : '-' %>
+                            <% } else if (service.pricing_model === 'hourly') { %>
+                                <%= service.hourly_rate ? service.hourly_rate.toLocaleString('sv-SE', { minimumFractionDigits: 2 }) + ' kr/timme' : '-' %>
+                            <% } else if (service.pricing_model === 'per_unit') { %>
+                                <%= service.price_per_unit ? service.price_per_unit.toLocaleString('sv-SE', { minimumFractionDigits: 2 }) + ' kr/' + (service.unit_type || 'st') : '-' %>
+                            <% } else if (service.pricing_model === 'base_plus_hourly') { %>
+                                <%= (service.base_price || 0).toLocaleString('sv-SE', { minimumFractionDigits: 2 }) %> kr + <%= (service.hourly_rate || 0).toLocaleString('sv-SE', { minimumFractionDigits: 2 }) %> kr/timme
+                            <% } %>
+                        </p>
+                    </div>
+                    <% if (service.internal_cost_per_hour) { %>
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Intern kostnad per timme</p>
+                        <p class="text-base font-medium text-gray-900"><%= service.internal_cost_per_hour.toLocaleString('sv-SE', { minimumFractionDigits: 2 }) %> kr</p>
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Time Estimation -->
+            <div class="border-t pt-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Tidsestimering & Krav</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Standard tid</p>
+                        <p class="text-base font-medium text-gray-900"><%= service.default_duration_minutes ? service.default_duration_minutes + ' min' : '-' %></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <% if (service.internal_notes) { %>
+            <div class="border-t pt-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Anteckningar</h3>
+                <div>
+                    <p class="text-sm text-gray-600 mb-1">Interna anteckningar</p>
+                    <p class="text-base text-gray-900"><%= service.internal_notes %></p>
+                </div>
+            </div>
+            <% } %>
+
+            <!-- Metadata -->
+            <div class="border-t pt-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Metadata</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Skapad</p>
+                        <p class="text-base text-gray-900"><%= new Date(service.created_at).toLocaleString('sv-SE') %></p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Senast uppdaterad</p>
+                        <p class="text-base text-gray-900"><%= service.updated_at ? new Date(service.updated_at).toLocaleString('sv-SE') : '-' %></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

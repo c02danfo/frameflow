@@ -304,7 +304,8 @@ router.get('/', async (req, res, next) => {
       db.query(`SELECT DISTINCT price_group FROM items WHERE price_group IS NOT NULL AND price_group <> '' ORDER BY price_group`),
     ]);
 
-    res.renderWithLayout('items/index-tailwind', {
+    // Use the index view that contains the client-side sorting logic
+    res.renderWithLayout('items/index', {
       items: result.rows,
       query: {
         q,

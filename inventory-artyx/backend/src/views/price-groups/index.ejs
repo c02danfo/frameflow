@@ -1,58 +1,72 @@
-<div>
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0">Price Groups</h2>
-    <a class="btn btn-primary" href="/price-groups/new">
-      <i class="bi bi-plus-circle me-2"></i>New Price Group
-    </a>
-  </div>
-
-  <% if (!priceGroups || priceGroups.length === 0) { %>
-    <div class="alert alert-info" role="alert">
-      <i class="bi bi-info-circle me-2"></i>No price groups found.
-    </div>
-  <% } else { %>
-    <div class="card">
-      <div class="card-body p-0">
-        <div class="table-responsive">
-          <table class="table table-hover table-striped mb-0">
-            <thead class="table-light">
-              <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Markup Percentage</th>
-                <th>Description</th>
-                <th>Example Calculation</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% priceGroups.forEach(function(pg){ %>
-                <tr>
-                  <td><%= pg.id %></td>
-                  <td><span class="badge bg-primary"><%= pg.name %></span></td>
-                  <td><strong><%= pg.markup_percentage %>%</strong></td>
-                  <td><%= pg.description || '-' %></td>
-                  <td>
-                    <small class="text-muted">
-                      Purchase: 100 → Sales: <%= (100 * pg.markup_percentage / 100).toFixed(2) %>
-                    </small>
-                  </td>
-                  <td>
-                    <a href="/price-groups/<%= pg.id %>/edit" class="btn btn-sm btn-outline-primary me-1" title="Edit">
-                      <i class="bi bi-pencil"></i>
-                    </a>
-                    <form method="POST" action="/price-groups/<%= pg.id %>/delete" style="display:inline" onsubmit="return confirm('Are you sure you want to delete this price group?');">
-                      <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
-                        <i class="bi bi-trash"></i>
-                      </button>
-                    </form>
-                  </td>
-                </tr>
-              <% }); %>
-            </tbody>
-          </table>
+<div class="bg-gray-50 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+            <div>
+                <h2 class="text-3xl font-bold text-gray-900">Prisgrupper</h2>
+                <p class="text-sm text-gray-600 mt-1">Hantera prisgrupper för artiklar</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <a href="/price-groups/new" class="inline-flex items-center px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-lg shadow-sm transition-colors">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Ny prisgrupp
+                </a>
+            </div>
         </div>
-      </div>
+
+        <!-- Price Groups Table -->
+        <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Namn</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Påslag</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Beskrivning</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Exempel</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Åtgärder</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <% if (!priceGroups || priceGroups.length === 0) { %>
+                        <tr>
+                            <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+                                Inga prisgrupper hittades. <a href="/price-groups/new" class="text-sky-600 hover:text-sky-700 font-medium">Skapa din första prisgrupp</a>
+                            </td>
+                        </tr>
+                    <% } else { %>
+                        <% priceGroups.forEach(function(pg){ %>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-2 text-sm text-gray-900 font-semibold"><%= pg.name %></td>
+                                <td class="px-4 py-2 text-xs">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                        <%= pg.markup_percentage %>%
+                                    </span>
+                                </td>
+                                <td class="px-4 py-2 text-xs text-gray-600"><%= pg.description || '-' %></td>
+                                <td class="px-4 py-2 text-xs text-gray-600">
+                                    100 kr → <span class="font-semibold text-gray-900"><%= (100 * pg.markup_percentage / 100).toFixed(2) %> kr</span>
+                                </td>
+                                <td class="px-4 py-2 text-xs text-right space-x-2">
+                                    <a href="/price-groups/<%= pg.id %>/edit" class="inline-flex items-center justify-center p-2 text-slate-400 hover:text-amber-600 transition-colors" title="Redigera">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                        </svg>
+                                    </a>
+                                    <form method="POST" action="/price-groups/<%= pg.id %>/delete" class="inline" onsubmit="return confirm('Är du säker på att du vill ta bort denna prisgrupp?');">
+                                        <button type="submit" class="inline-flex items-center justify-center p-2 text-slate-400 hover:text-red-600 transition-colors" title="Radera">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
     </div>
-  <% } %>
 </div>
