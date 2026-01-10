@@ -27,7 +27,7 @@ Expects: user, domain, dashboardBaseUrl, inventoryBaseUrl, framingBaseUrl, authB
                         Home
                     </a>
                     
-                    <!-- Artiklar dropdown -->
+                    <!-- Material dropdown -->
                     <div class="relative" x-data="{ open: false }">
                         <button @click="open = !open" @click.away="open = false"
                                 class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-slate-700 rounded-md transition-colors">
@@ -43,9 +43,9 @@ Expects: user, domain, dashboardBaseUrl, inventoryBaseUrl, framingBaseUrl, authB
                              class="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-slate-700 ring-1 ring-black ring-opacity-5 z-50">
                             <div class="py-1">
                                 <a href="<%= inventoryBaseUrl || 'https://inventory.frameflowapp.com' %>/items" 
-                                   class="block px-4 py-2 text-sm text-gray-300 hover:bg-slate-600 hover:text-white">Artiklar</a>
+                                              class="block px-4 py-2 text-sm text-gray-300 hover:bg-slate-600 hover:text-white">Material</a>
                                 <a href="<%= inventoryBaseUrl || 'https://inventory.frameflowapp.com' %>/items/new" 
-                                   class="block px-4 py-2 text-sm text-gray-300 hover:bg-slate-600 hover:text-white">Ny artikel</a>
+                                              class="block px-4 py-2 text-sm text-gray-300 hover:bg-slate-600 hover:text-white">Nytt Material</a>
                                           <div class="border-t border-slate-600 my-1"></div>
                                           <a href="<%= inventoryBaseUrl || 'https://inventory.frameflowapp.com' %>/services" 
                                               class="block px-4 py-2 text-sm text-gray-300 hover:bg-slate-600 hover:text-white">Tjänster</a>
@@ -162,14 +162,14 @@ Expects: user, domain, dashboardBaseUrl, inventoryBaseUrl, framingBaseUrl, authB
                 Hem
             </a>
             
-            <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Artiklar</div>
+            <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Material</div>
             <a href="<%= inventoryBaseUrl || 'https://inventory.frameflowapp.com' %>/items" 
                class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-slate-800 pl-6">
-                Artiklar
+                Material
             </a>
             <a href="<%= inventoryBaseUrl || 'https://inventory.frameflowapp.com' %>/items/new" 
                class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-slate-800 pl-6">
-                Ny artikel
+                Nytt Material
             </a>
             
             <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Order</div>

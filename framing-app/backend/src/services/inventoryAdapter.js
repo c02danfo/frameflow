@@ -71,6 +71,40 @@ async function getLabor() {
   return getMaterialsByCategories(['Arbete', 'arbete']);
 }
 
+// Hämta alla tjänster från services-tabellen (inventory-artyx)
+// Normaliserar till samma shape som items: id, name, sku, sales_price
+async function getServices() {
+  try {
+    const result = await db.inventoryQuery(
+      `SELECT
+        id,
+        name,
+        sku,
+        category,
+        pricing_model,
+        unit_type,
+        COALESCE(
+          CASE pricing_model
+            WHEN 'fixed' THEN base_price
+            WHEN 'hourly' THEN hourly_rate
+            WHEN 'per_unit' THEN price_per_unit
+            WHEN 'base_plus_hourly' THEN base_price
+            ELSE base_price
+          END,
+          0
+        )::numeric(12,2) AS sales_price
+      FROM services
+      ORDER BY name`,
+      []
+    );
+
+    return result.rows;
+  } catch (error) {
+    console.error('Error fetching services:', error);
+    throw error;
+  }
+}
+
 module.exports = {
   getMaterialsByCategory,
   getMaterialsByCategories,
@@ -79,5 +113,6 @@ module.exports = {
   getGlass,
   getBackings,
   getPassepartouts,
-  getLabor
+  getLabor,
+  getServices
 };

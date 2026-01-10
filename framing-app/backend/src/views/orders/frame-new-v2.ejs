@@ -20,8 +20,23 @@
         <!-- Form -->
         <div class="lg:col-span-2">
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <form method="POST" action="/orders/<%= order.id %>/frames" id="frameForm" class="space-y-6" enctype="multipart/form-data">
+                <form method="POST" action="/orders/<%= order.id %>/frames" id="frameForm" class="space-y-6">
                     
+                    <!-- Template Selection -->
+                    <div class="bg-sky-50 border border-sky-200 rounded-lg p-4">
+                        <div class="flex items-center gap-3">
+                            <select id="templateSelect" class="flex-1 px-3 py-2 bg-white border border-sky-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
+                                <option value="">-- Välj mall (valfritt) --</option>
+                                <% (templates || []).forEach(t => { %>
+                                <option value="<%= t.id %>"><%= t.name %></option>
+                                <% }); %>
+                            </select>
+                            <button type="button" id="loadTemplate" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white text-sm font-medium rounded-lg transition-colors">
+                                Ladda mall
+                            </button>
+                        </div>
+                    </div>
+
                     <!-- Basic Info -->
                     <div class="grid grid-cols-2 gap-4">
                         <div>
@@ -94,19 +109,10 @@
                     <!-- Items List -->
                     <div class="border-t border-slate-200 pt-4">
                         <div class="flex items-center justify-between mb-3">
-                            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Material & Tjänster</h3>
+                            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Artiklar & Tjänster</h3>
                             <div class="flex gap-2">
-                                <select id="templateSelect" class="px-2 py-1 bg-white border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-sky-500">
-                                    <option value="">Välj mall...</option>
-                                    <% (templates || []).forEach(t => { %>
-                                    <option value="<%= t.id %>"><%= t.name %></option>
-                                    <% }); %>
-                                </select>
-                                <button type="button" id="loadTemplate" class="px-3 py-1 bg-sky-600 hover:bg-sky-700 text-white text-xs font-medium rounded transition-colors">
-                                    Ladda
-                                </button>
                                 <button type="button" id="addArticleBtn" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium rounded transition-colors">
-                                    + Material
+                                    + Artikel
                                 </button>
                                 <button type="button" id="addServiceBtn" class="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white text-xs font-medium rounded transition-colors">
                                     + Tjänst
@@ -118,7 +124,7 @@
                         <div id="itemsContainer" class="space-y-2"></div>
                         
                         <!-- Hidden items data for form submission -->
-                        <input type="hidden" name="itemsData" id="itemsData" />
+                        <input type="hidden" name="items" id="itemsData" />
                     </div>
 
                     <!-- Notes -->
@@ -135,33 +141,6 @@
                         </label>
                         <div id="templateNameContainer" class="hidden mt-2">
                             <input type="text" id="templateName" placeholder="Mallnamn" class="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
-                        </div>
-                    </div>
-
-                    <!-- Photo Documentation -->
-                    <div class="border-t border-slate-200 pt-4">
-                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Fotodokumentation</h3>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <!-- Before Photos -->
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-2">Före-bilder (max 3)</label>
-                                <input type="file" id="beforeImages" accept="image/*" capture="environment" multiple class="hidden">
-                                <button type="button" onclick="document.getElementById('beforeImages').click()" class="inline-flex items-center px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-medium rounded-lg transition-colors w-full justify-center">
-                                    📷 Lägg till före-bilder
-                                </button>
-                                <div id="beforePreview" class="grid grid-cols-3 gap-2 mt-2"></div>
-                            </div>
-                            
-                            <!-- After Photos -->
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-2">Efter-bilder (max 3)</label>
-                                <input type="file" id="afterImages" accept="image/*" capture="environment" multiple class="hidden">
-                                <button type="button" onclick="document.getElementById('afterImages').click()" class="inline-flex items-center px-3 py-2 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 text-xs font-medium rounded-lg transition-colors w-full justify-center">
-                                    📷 Lägg till efter-bilder
-                                </button>
-                                <div id="afterPreview" class="grid grid-cols-3 gap-2 mt-2"></div>
-                            </div>
                         </div>
                     </div>
 
@@ -197,18 +176,13 @@
 // Data storage
 let items = [];
 let itemIdCounter = 0;
-let beforePhotos = [];
-let afterPhotos = [];
 
 // Available items data
 const availableItems = {
-    // IMPORTANT: use unescaped EJS output so JSON isn't HTML-entity-escaped (e.g. &quot;),
-    // which would break JavaScript parsing with "Unexpected token '&'".
-    frame: <%- JSON.stringify(frames || []) %>,
-    glass: <%- JSON.stringify(glasses || []) %>,
-    passepartout: <%- JSON.stringify(passepartouts || []) %>,
-    // 'labor' type in UI maps to services table data
-    labor: <%- JSON.stringify(services || []) %>
+    frame: <%= JSON.stringify(frames || []) %>,
+    glass: <%= JSON.stringify(glasses || []) %>,
+    passepartout: <%= JSON.stringify(passepartouts || []) %>,
+    labor: <%= JSON.stringify(labors || []) %>
 };
 
 // Initialize
@@ -224,10 +198,6 @@ function setupEventListeners() {
     document.getElementById('saveAsTemplate').addEventListener('change', toggleTemplateNameInput);
     document.getElementById('togglePP').addEventListener('click', togglePPEdges);
     document.getElementById('loadTemplate').addEventListener('click', loadTemplate);
-    
-    // Photo upload listeners
-    document.getElementById('beforeImages').addEventListener('change', (e) => handlePhotoSelection(e, 'before'));
-    document.getElementById('afterImages').addEventListener('change', (e) => handlePhotoSelection(e, 'after'));
     
     // Trigger calculation on dimension changes
     ['motiv_bredd_mm', 'motiv_hojd_mm', 'pp_vanster_mm', 'pp_hoger_mm', 'pp_topp_mm', 'pp_botten_mm', 
@@ -258,64 +228,6 @@ function togglePPEdges() {
 function toggleTemplateNameInput() {
     const checked = document.getElementById('saveAsTemplate').checked;
     document.getElementById('templateNameContainer').classList.toggle('hidden', !checked);
-}
-
-function handlePhotoSelection(event, category) {
-    const files = Array.from(event.target.files);
-    const photoArray = category === 'before' ? beforePhotos : afterPhotos;
-    const maxPhotos = 3;
-    
-    // Check total count
-    const remainingSlots = maxPhotos - photoArray.length;
-    if (files.length > remainingSlots) {
-        alert(`Du kan bara lägga till ${remainingSlots} fler bild(er). Max ${maxPhotos} bilder per kategori.`);
-        event.target.value = '';
-        return;
-    }
-    
-    // Add new photos
-    files.forEach(file => {
-        if (file.type.startsWith('image/')) {
-            photoArray.push(file);
-        }
-    });
-    
-    // Update array reference
-    if (category === 'before') {
-        beforePhotos = photoArray;
-    } else {
-        afterPhotos = photoArray;
-    }
-    
-    renderPhotoPreview(category);
-    event.target.value = ''; // Reset input
-}
-
-function renderPhotoPreview(category) {
-    const photoArray = category === 'before' ? beforePhotos : afterPhotos;
-    const containerId = category === 'before' ? 'beforePreview' : 'afterPreview';
-    const container = document.getElementById(containerId);
-    
-    container.innerHTML = photoArray.map((file, index) => `
-        <div class="relative aspect-square bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
-            <img src="${URL.createObjectURL(file)}" class="w-full h-full object-cover" alt="${category} ${index + 1}">
-            <button type="button" onclick="removePhoto('${category}', ${index})" class="absolute top-1 right-1 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full text-xs font-bold transition-colors">
-                ×
-            </button>
-            <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-[10px] text-center py-0.5">
-                ${(file.size / 1024).toFixed(0)} KB
-            </div>
-        </div>
-    `).join('');
-}
-
-function removePhoto(category, index) {
-    if (category === 'before') {
-        beforePhotos.splice(index, 1);
-    } else {
-        afterPhotos.splice(index, 1);
-    }
-    renderPhotoPreview(category);
 }
 
 function addItem(category) {
@@ -382,30 +294,24 @@ function renderItems() {
     
     container.innerHTML = items.map(item => {
         const isService = item.category === 'service';
-        
-        // Build type options with correct selected state
-        let typeOptionsHtml = '';
-        if (isService) {
-            typeOptionsHtml = `<option value="labor" ${item.type === 'labor' ? 'selected' : ''}>Arbete/Tjänst</option>`;
-        } else {
-            typeOptionsHtml = `
-                <option value="frame" ${item.type === 'frame' ? 'selected' : ''}>Ram</option>
-                <option value="glass" ${item.type === 'glass' ? 'selected' : ''}>Glas</option>
-                <option value="passepartout" ${item.type === 'passepartout' ? 'selected' : ''}>Passepartout</option>
-            `;
-        }
+        const typeOptions = isService 
+            ? '<option value="labor">Arbete/Tjänst</option>'
+            : `<option value="frame">Ram</option>
+               <option value="glass">Glas</option>
+               <option value="passepartout">Passepartout</option>`;
         
         const itemOptions = (availableItems[item.type] || []).map(i => 
             `<option value="${i.id}" ${item.item_id == i.id ? 'selected' : ''}>${i.name} (${i.sku}) - ${i.sales_price} kr</option>`
         ).join('');
         
-        const unitLabel = item.type === 'glass' || item.type === 'passepartout' ? 'm\u00B2' : 
+        const unitLabel = item.type === 'glass' || item.type === 'passepartout' ? 'm²' : 
                           item.type === 'labor' ? (isService ? 'tim' : 'm') : 'm';
         
         return `
             <div class="flex items-center gap-2 p-2 bg-slate-50 rounded-lg border border-slate-200">
                 <select onchange="updateItem(${item.id}, 'type', this.value)" class="w-32 px-2 py-1 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-1 focus:ring-sky-500">
-                    ${typeOptionsHtml}
+                    ${typeOptions}
+                    <option value="${item.type}" selected hidden>${item.type}</option>
                 </select>
                 
                 <select onchange="updateItem(${item.id}, 'item_id', this.value)" class="flex-1 px-2 py-1 border border-gray-300 rounded text-xs bg-white focus:outline-none focus:ring-1 focus:ring-sky-500">
@@ -440,12 +346,12 @@ function renderItems() {
     }).join('');
 }
 
-function calculatePrice() {
+async function calculatePrice() {
     const mwMm = parseFloat(document.getElementById('motiv_bredd_mm').value) || 0;
     const mhMm = parseFloat(document.getElementById('motiv_hojd_mm').value) || 0;
     
-    if (!mwMm || !mhMm) {
-        document.getElementById('pricePreview').innerHTML = '<p class="text-xs text-slate-400 italic">Fyll i motiv-bredd och höjd</p>';
+    if (!mwMm || !mhMm || items.length === 0) {
+        document.getElementById('pricePreview').innerHTML = '<p class="text-xs text-slate-400 italic">Fyll i mått och artiklar</p>';
         return;
     }
     
@@ -466,84 +372,35 @@ function calculatePrice() {
         <span class="px-2 py-0.5 bg-slate-100 rounded text-[10px] font-bold text-slate-600">Antal: ${quantity}st</span>
     `;
     
-    // Determine calculation method
-    const method = document.getElementById('calculation_method').value;
+    // Calculate total
     let totalExclMoms = 0;
     let html = '<div class="space-y-1.5">';
     
-    if (method === 'simple') {
-        // ENKEL METOD: Omkrets * pris/m * antal
-        const pricePerMeterInput = document.getElementById('simple_price_per_meter');
-        const pricePerMeter = parseFloat(pricePerMeterInput ? pricePerMeterInput.value : 0) || 0;
+    items.forEach(item => {
+        let itemQuantity = parseFloat(item.quantity) || 0;
         
-        if (pricePerMeter > 0) {
-            totalExclMoms = perimeter * pricePerMeter * quantity;
-            
+        // Calculate based on type
+        if (item.type === 'frame' || item.type === 'labor') {
+            itemQuantity = perimeter;
+        } else if (item.type === 'glass' || item.type === 'passepartout') {
+            itemQuantity = outerArea;
+        }
+        
+        const cost = itemQuantity * (parseFloat(item.unit_price) || 0);
+        totalExclMoms += cost;
+        
+        if (cost > 0) {
             html += `
                 <div class="flex justify-between items-center py-1 border-b border-slate-100 text-xs">
                     <div>
-                        <p class="text-slate-400 font-bold text-[10px] uppercase">Ram (Enkel)</p>
-                        <p class="text-slate-600">${perimeter.toFixed(2)}m × ${pricePerMeter} kr/m × ${quantity}st</p>
+                        <p class="text-slate-400 font-bold text-[10px] uppercase">${item.type}</p>
+                        <p class="text-slate-600">${item.item_name || 'Ej vald'}</p>
                     </div>
-                    <span class="text-slate-900 font-bold">${totalExclMoms.toFixed(2)} kr</span>
-                </div>
-            `;
-        } else {
-            html += `
-                <div class="flex justify-between items-center py-1 border-b border-slate-100 text-xs">
-                    <div>
-                        <p class="text-slate-400 font-bold text-[10px] uppercase">Ram (Enkel)</p>
-                        <p class="text-slate-600">Ange pris/m för beräkning</p>
-                    </div>
-                    <span class="text-slate-900 font-bold">0.00 kr</span>
+                    <span class="text-slate-900 font-bold">${cost.toFixed(2)} kr</span>
                 </div>
             `;
         }
-    } else {
-        // STANDARD METOD: Beräkna från Material & Tjänster lista
-        if (items.length === 0) {
-            document.getElementById('pricePreview').innerHTML = '<p class="text-xs text-slate-400 italic">Lägg till material eller tjänster för att beräkna pris</p>';
-            return;
-        }
-        
-        items.forEach(item => {
-            let itemQuantity = parseFloat(item.quantity) || 0;
-            
-            // Auto-beräkna kvantitet baserat på typ
-            if (item.type === 'frame') {
-                itemQuantity = perimeter * quantity;
-            } else if (item.type === 'glass' || item.type === 'passepartout') {
-                itemQuantity = outerArea * quantity;
-            }
-            // För labor/tjänst: använd manuell quantity
-            
-            const cost = itemQuantity * (parseFloat(item.unit_price) || 0);
-            totalExclMoms += cost;
-            
-            if (cost > 0 || itemQuantity > 0) {
-                const unitLabel = item.type === 'glass' || item.type === 'passepartout' ? 'm²' : 
-                                  item.type === 'labor' ? 'tim' : 'm';
-                
-                html += `
-                    <div class="flex justify-between items-center py-1 border-b border-slate-100 text-xs">
-                        <div>
-                            <p class="text-slate-400 font-bold text-[10px] uppercase">${item.type}</p>
-                            <p class="text-slate-600">${item.item_name || 'Ej vald'} (${itemQuantity.toFixed(2)}${unitLabel})</p>
-                        </div>
-                        <span class="text-slate-900 font-bold">${cost.toFixed(2)} kr</span>
-                    </div>
-                `;
-            }
-        });
-        
-        if (totalExclMoms === 0) {
-            html += `
-                <div class="text-xs text-slate-400 italic py-2">
-                    Ingen kostnad beräknad. Lägg till material/tjänster med pris.
-                </div>
-            `;
-        }
-    }
+    });
     
     const totalInclMoms = totalExclMoms * 1.25;
     
@@ -554,7 +411,7 @@ function calculatePrice() {
                 <span class="text-slate-900 font-bold">${totalExclMoms.toFixed(2)} kr</span>
             </div>
             <div class="flex justify-between items-center p-2 bg-emerald-50 rounded-lg border border-emerald-100">
-                <span class="text-xs font-bold text-emerald-700">Inkl. moms (25%)</span>
+                <span class="text-xs font-bold text-emerald-700">Inkl. moms</span>
                 <span class="text-lg font-extrabold text-emerald-700">${totalInclMoms.toFixed(2)} kr</span>
             </div>
         </div>
@@ -567,33 +424,7 @@ function calculatePrice() {
 function handleSubmit(e) {
     e.preventDefault();
     
-    // Validate required fields
-    const motivBredd = document.getElementById('motiv_bredd_mm').value;
-    const motivHojd = document.getElementById('motiv_hojd_mm').value;
-    const antal = document.getElementById('antal').value;
-    
-    if (!motivBredd || !motivHojd || !antal) {
-        alert('Fyll i alla obligatoriska fält (märkta med *).');
-        return;
-    }
-    
-    // Create FormData with all form fields
-    const formData = new FormData();
-    
-    // Add all input fields from the form
-    formData.append('motiv', document.getElementById('motiv').value || '');
-    formData.append('antal', document.getElementById('antal').value);
-    formData.append('motiv_bredd_mm', document.getElementById('motiv_bredd_mm').value);
-    formData.append('motiv_hojd_mm', document.getElementById('motiv_hojd_mm').value);
-    formData.append('pp_vanster_mm', document.getElementById('pp_vanster_mm').value);
-    formData.append('pp_hoger_mm', document.getElementById('pp_hoger_mm').value);
-    formData.append('pp_topp_mm', document.getElementById('pp_topp_mm').value);
-    formData.append('pp_botten_mm', document.getElementById('pp_botten_mm').value);
-    formData.append('calculation_method', document.getElementById('calculation_method').value);
-    formData.append('simple_price_per_meter', document.getElementById('simple_price_per_meter').value);
-    formData.append('notes', document.getElementById('notes').value || '');
-    
-    // Add items as JSON
+    // Prepare items data
     const itemsData = items.map(item => ({
         type: item.type,
         item_id: item.item_id,
@@ -603,36 +434,11 @@ function handleSubmit(e) {
         unit_price: item.unit_price,
         metadata: item.metadata
     }));
-    formData.append('itemsData', JSON.stringify(itemsData));
     
-    // Add template options
-    if (document.getElementById('saveAsTemplate').checked) {
-        formData.append('saveAsTemplate', 'on');
-        formData.append('templateName', document.getElementById('templateName').value);
-    }
+    document.getElementById('itemsData').value = JSON.stringify(itemsData);
     
-    // Add photos
-    beforePhotos.forEach((file) => {
-        formData.append('beforeImages', file);
-    });
-    afterPhotos.forEach((file) => {
-        formData.append('afterImages', file);
-    });
-    
-    // Submit via fetch for FormData support
-    fetch(e.target.action, {
-        method: 'POST',
-        body: formData
-    }).then(response => {
-        if (response.ok) {
-            window.location.href = response.url;
-        } else {
-            alert('Ett fel uppstod vid sparandet. Försök igen.');
-        }
-    }).catch(error => {
-        console.error('Error:', error);
-        alert('Ett fel uppstod vid sparandet. Försök igen.');
-    });
+    // Submit form
+    e.target.submit();
 }
 
 async function loadTemplate() {

@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS customer_orders (
     customer_id INTEGER NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
     order_date DATE NOT NULL DEFAULT CURRENT_DATE,
     delivery_date DATE,
-    status VARCHAR(50) DEFAULT 'draft', -- draft, confirmed, completed, cancelled
+    status VARCHAR(50) DEFAULT 'Offert', -- Offert, Ej påbörjad, Påbörjad, Klart, Utlämnad
     total_price_excl_moms DECIMAL(10,2) DEFAULT 0,
     total_price_incl_moms DECIMAL(10,2) DEFAULT 0,
     notes TEXT,

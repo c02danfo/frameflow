@@ -22,6 +22,7 @@ const db = require('./db');
 const customerRoutes = require('./routes/customers');
 const orderRoutes = require('./routes/orders');
 const companyDataRoutes = require('./routes/company-data');
+const templateRoutes = require('./routes/templates');
 const { requireAuth } = require('./utils/authServiceMiddleware');
 
 const app = express();
@@ -110,6 +111,7 @@ app.use((req, res, next) => {
 app.use('/customers', requireAuth, customerRoutes);
 app.use('/orders', requireAuth, orderRoutes);
 app.use('/company-data', requireAuth, companyDataRoutes);
+app.use('/templates', requireAuth, templateRoutes);
 
 // Root redirect
 app.get('/', requireAuth, (req, res) => {

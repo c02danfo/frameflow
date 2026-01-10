@@ -51,6 +51,7 @@ authPool.on('error', (err) => {
 
 module.exports = {
   query: (text, params) => pool.query(text, params),
+  getClient: () => pool.connect(),
   pool,
   inventoryQuery: (text, params) => inventoryPool.query(text, params),
   inventoryPool,

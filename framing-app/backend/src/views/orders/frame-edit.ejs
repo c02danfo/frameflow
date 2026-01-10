@@ -236,44 +236,44 @@ async function calculatePrice() {
         const data = await response.json();
         
         const omkretsM = (2 * outerWmm + 2 * outerHmm) / 1000;
-        document.getElementById('sizePreview').innerHTML = \`
-            <span class="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold text-slate-600 uppercase tracking-tight">Omkrets: \${omkretsM.toFixed(2)}m</span>
-            <span class="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold text-slate-600 uppercase tracking-tight">Area: \${outerArea.toFixed(4)}m²</span>
-            <span class="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold text-slate-600 uppercase tracking-tight">Antal: \${quantity}st</span>
-        \`;
+        document.getElementById('sizePreview').innerHTML = `
+            <span class="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold text-slate-600 uppercase tracking-tight">Omkrets: ${omkretsM.toFixed(2)}m</span>
+            <span class="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold text-slate-600 uppercase tracking-tight">Area: ${outerArea.toFixed(4)}m²</span>
+            <span class="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold text-slate-600 uppercase tracking-tight">Antal: ${quantity}st</span>
+        `;
         
         let html = '<div class="space-y-3">';
-        const addRow = (label, detail, cost) => \`
+        const addRow = (label, detail, cost) => `
             <div class="flex justify-between items-center py-2 border-b border-slate-50 text-sm">
                 <div>
-                    <p class="text-slate-400 font-bold text-[10px] uppercase tracking-tight">\${label}</p>
-                    <p class="text-slate-600 font-medium">\${detail}</p>
+                    <p class="text-slate-400 font-bold text-[10px] uppercase tracking-tight">${label}</p>
+                    <p class="text-slate-600 font-medium">${detail}</p>
                 </div>
-                <span class="text-slate-900 font-bold">\${cost} kr</span>
+                <span class="text-slate-900 font-bold">${cost} kr</span>
             </div>
-        \`;
+        `;
 
         if (data.frame_cost > 0) {
-            const detail = formData.calculation_method === 'simple' ? \`\${data.frame_length_meters}m × \${formData.simple_price_per_meter}kr/m\` : \`\${data.frame_length_meters}m × pris\`;
+            const detail = formData.calculation_method === 'simple' ? `${data.frame_length_meters}m × ${formData.simple_price_per_meter}kr/m` : `${data.frame_length_meters}m × pris`;
             html += addRow('Ram', detail, data.frame_cost);
         }
-        if (data.glass_cost > 0) html += addRow('Glas', \`\${data.glass_area_sqm}m²\`, data.glass_cost);
-        if (data.passepartout_cost > 0) html += addRow('Passepartout', \`\${data.passepartout_area_sqm}m²\`, data.passepartout_cost);
-        if (data.passepartout2_cost > 0) html += addRow('Passepartout 2', \`\${data.passepartout2_area_sqm}m²\`, data.passepartout2_cost);
-        if (data.labor_cost > 0) html += addRow('Arbete', \`\${data.frame_length_meters}m\`, data.labor_cost);
+        if (data.glass_cost > 0) html += addRow('Glas', `${data.glass_area_sqm}m²`, data.glass_cost);
+        if (data.passepartout_cost > 0) html += addRow('Passepartout', `${data.passepartout_area_sqm}m²`, data.passepartout_cost);
+        if (data.passepartout2_cost > 0) html += addRow('Passepartout 2', `${data.passepartout2_area_sqm}m²`, data.passepartout2_cost);
+        if (data.labor_cost > 0) html += addRow('Arbete', `${data.frame_length_meters}m`, data.labor_cost);
         
-        html += \`
+        html += `
             <div class="pt-4 space-y-2">
                 <div class="flex justify-between items-center text-sm">
                     <span class="text-slate-500 font-medium">Exkl. moms</span>
-                    <span class="text-slate-900 font-bold">\${data.total_cost_excl_moms} kr</span>
+                    <span class="text-slate-900 font-bold">${data.total_cost_excl_moms} kr</span>
                 </div>
                 <div class="flex justify-between items-center p-3 bg-emerald-50 rounded-xl border border-emerald-100">
                     <span class="text-sm font-bold text-emerald-700">Inkl. moms</span>
-                    <span class="text-xl font-extrabold text-emerald-700">\${data.total_cost_incl_moms} kr</span>
+                    <span class="text-xl font-extrabold text-emerald-700">${data.total_cost_incl_moms} kr</span>
                 </div>
             </div>
-        \`;
+        `;
         html += '</div>';
         document.getElementById('pricePreview').innerHTML = html;
     } catch (error) {
