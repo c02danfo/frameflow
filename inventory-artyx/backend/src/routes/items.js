@@ -794,11 +794,13 @@ router.post('/', upload.array('images', 5), async (req, res, next) => {
     // Auto-generate internal barcode based on SKU
     const newId = result.rows[0].id;
     const newSku = result.rows[0].sku;
-    const internalBarcode = `INT-${newSku}`;
-    await db.query(
-      `UPDATE items SET barcode = $1, barcode_type = 'CODE128' WHERE id = $2`,
-      [internalBarcode, newId]
-    );
+    if (newSku) {
+      const internalBarcode = `INT-${newSku}`;
+      await db.query(
+        `UPDATE items SET barcode = $1, barcode_type = 'CODE128' WHERE id = $2`,
+        [internalBarcode, newId]
+      );
+    }
     
     // Process uploaded images if any
     if (req.files && req.files.length > 0) {

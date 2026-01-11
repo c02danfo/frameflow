@@ -115,6 +115,7 @@ CREATE OR REPLACE FUNCTION consume_prefix_seq(cat TEXT)
 RETURNS TABLE(prefix CHAR(4), seq INT) AS $$
 DECLARE
   p CHAR(4);
+  v_seq INT;
 BEGIN
   p := derive_prefix(cat);
 
@@ -125,11 +126,11 @@ BEGIN
 
   -- Lås rad och konsumera sekvens
   UPDATE category_prefixes cp
-  SET next_seq = next_seq + 1
+  SET next_seq = cp.next_seq + 1
   WHERE cp.category = cat
-  RETURNING cp.prefix, cp.next_seq - 1 INTO prefix, seq;
+  RETURNING cp.prefix, cp.next_seq - 1 INTO p, v_seq;
 
-  RETURN;
+  RETURN QUERY SELECT p, v_seq;
 END;
 $$ LANGUAGE plpgsql;
 

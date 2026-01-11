@@ -109,7 +109,6 @@ app.use((req, res, next) => {
 app.use('/items', requireAuth, itemsRouter);
 app.use('/price-groups', requireAuth, priceGroupsRouter);
 app.use('/services', requireAuth, servicesRouter);
-app.use('/services', requireAuth, servicesRouter);
 
 app.get('/', requireAuth, (req, res) => {
   res.redirect('/items');

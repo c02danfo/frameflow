@@ -210,6 +210,16 @@ CREATE INDEX IF NOT EXISTS idx_customer_orders_customer_id ON customer_orders(cu
 CREATE INDEX IF NOT EXISTS idx_customer_orders_order_number ON customer_orders(order_number);
 CREATE INDEX IF NOT EXISTS idx_frame_orders_customer_order_id ON frame_orders(customer_order_id);
 
+-- Templates för snabb ramorder (sparar ofta använda materialkombinationer)
+CREATE TABLE IF NOT EXISTS frame_order_templates (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    items JSONB NOT NULL, -- Array av material-val { frame_id, glass_id, etc }
+    default_passepartout_edges JSONB, -- { left, right, top, bottom }
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Default admin user (username: admin, password: admin123)
 -- Hash för bcrypt: $2b$10$... (genereras vid första körningen)
 INSERT INTO users (username, password_hash) 
