@@ -1,13 +1,15 @@
 function createSessionMiddleware({ session, connectPgSimple, pool, secret }) {
   const PgSession = connectPgSimple(session);
   
-  // Get domain from env, with fallback
   const domain = process.env.DOMAIN || 'frameflowapp.com';
-  // Convert domain to cookie domain (e.g., frameflowapp.com -> .frameflowapp.com for subdomain sharing)
-  // Ensure we always have a leading dot for cross-subdomain cookies
-  const cookieDomain = domain.startsWith('.') ? domain : '.' + domain;
+  const isLocal = domain === 'localhost' || domain === '127.0.0.1' || domain.endsWith('.localhost');
+  const cookieDomain = isLocal
+    ? undefined
+    : domain.startsWith('.')
+      ? domain
+      : `.${domain}`;
   
-  console.log(`[session] Setting cookie domain to: ${cookieDomain}`);
+  console.log(`[session] Setting cookie domain to: ${cookieDomain || 'host-default'}`);
 
   return session({
     store: new PgSession({
@@ -22,7 +24,7 @@ function createSessionMiddleware({ session, connectPgSimple, pool, secret }) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      domain: cookieDomain  // Share cookies across subdomains
+      ...(cookieDomain ? { domain: cookieDomain } : {})
     }
   });
 }

@@ -2,7 +2,7 @@
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
         <div>
-            <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Ny Artikel</h2>
+            <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight"><%= locals.isEdit ? 'Redigera Artikel' : 'Ny Artikel' %></h2>
             <p class="text-sm font-medium text-slate-500">Order <%= order.order_number %></p>
         </div>
         <a href="/orders/<%= order.id %>" class="inline-flex items-center px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 text-sm font-medium rounded-lg transition-colors">
@@ -20,19 +20,19 @@
         <!-- Form -->
         <div class="lg:col-span-2">
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <form method="POST" action="/orders/<%= order.id %>/frames" id="frameForm" class="space-y-6" enctype="multipart/form-data">
+                <form method="POST" action="<%= locals.isEdit ? `/orders/${order.id}/frames/${frame.id}/edit` : `/orders/${order.id}/frames` %>" id="frameForm" class="space-y-6" enctype="multipart/form-data">
                     
                     <!-- Basic Info -->
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label for="motiv" class="block text-xs font-medium text-gray-700 mb-1">Motiv</label>
-                            <input type="text" id="motiv" name="motiv" placeholder="t.ex. Oljemålning" class="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
+                            <input type="text" id="motiv" name="motiv" value="<%= locals.frame ? frame.motiv || '' : '' %>" placeholder="t.ex. Oljemålning" class="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
                         </div>
                         <div>
                             <label for="antal" class="block text-xs font-medium text-gray-700 mb-1">
                                 Antal<span class="text-red-500 ml-1">*</span>
                             </label>
-                            <input type="number" id="antal" name="antal" min="1" value="1" required class="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
+                            <input type="number" id="antal" name="antal" min="1" value="<%= locals.frame ? frame.antal || 1 : 1 %>" required class="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
                         </div>
                     </div>
 
@@ -44,24 +44,24 @@
                                 <label for="motiv_bredd_mm" class="block text-xs font-medium text-gray-700 mb-1">
                                     Bredd (mm)<span class="text-red-500 ml-1">*</span>
                                 </label>
-                                <input type="number" id="motiv_bredd_mm" name="motiv_bredd_mm" required class="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
+                                <input type="number" id="motiv_bredd_mm" name="motiv_bredd_mm" value="<%= locals.frame ? frame.motiv_width_mm || '' : '' %>" required class="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
                             </div>
                             <div>
                                 <label for="motiv_hojd_mm" class="block text-xs font-medium text-gray-700 mb-1">
                                     Höjd (mm)<span class="text-red-500 ml-1">*</span>
                                 </label>
-                                <input type="number" id="motiv_hojd_mm" name="motiv_hojd_mm" required class="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
+                                <input type="number" id="motiv_hojd_mm" name="motiv_hojd_mm" value="<%= locals.frame ? frame.motiv_height_mm || '' : '' %>" required class="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
                             </div>
                             <div>
                                 <label for="calculation_method" class="block text-xs font-medium text-gray-700 mb-1">Metod</label>
                                 <select id="calculation_method" name="calculation_method" class="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 bg-white">
-                                    <option value="simple">Enkel</option>
-                                    <option value="standard">Standard</option>
+                                    <option value="simple" <%= locals.frame && frame.calculation_method === 'simple' ? 'selected' : '' %>>Enkel</option>
+                                    <option value="standard" <%= locals.frame && frame.calculation_method === 'standard' ? 'selected' : '' %>>Standard</option>
                                 </select>
                             </div>
                             <div id="simple_price_container">
                                 <label for="simple_price_per_meter" class="block text-xs font-medium text-gray-700 mb-1">Pris/m</label>
-                                <input type="number" id="simple_price_per_meter" name="simple_price_per_meter" step="0.01" value="250" class="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
+                                <input type="number" id="simple_price_per_meter" name="simple_price_per_meter" step="0.01" value="<%= locals.frame ? frame.manual_simple_price_per_meter || 250 : 250 %>" class="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
                             </div>
                         </div>
                         
@@ -73,19 +73,19 @@
                             <div id="ppEdges" class="hidden grid grid-cols-4 gap-2 mt-2">
                                 <div>
                                     <label class="block text-[10px] font-medium text-gray-600 mb-1">Vänster</label>
-                                    <input type="number" id="pp_vanster_mm" value="0" class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-sky-500">
+                                    <input type="number" id="pp_vanster_mm" value="<%= locals.frame ? frame.pp_left_mm || 0 : 0 %>" class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-sky-500">
                                 </div>
                                 <div>
                                     <label class="block text-[10px] font-medium text-gray-600 mb-1">Höger</label>
-                                    <input type="number" id="pp_hoger_mm" value="0" class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-sky-500">
+                                    <input type="number" id="pp_hoger_mm" value="<%= locals.frame ? frame.pp_right_mm || 0 : 0 %>" class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-sky-500">
                                 </div>
                                 <div>
                                     <label class="block text-[10px] font-medium text-gray-600 mb-1">Topp</label>
-                                    <input type="number" id="pp_topp_mm" value="0" class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-sky-500">
+                                    <input type="number" id="pp_topp_mm" value="<%= locals.frame ? frame.pp_top_mm || 0 : 0 %>" class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-sky-500">
                                 </div>
                                 <div>
                                     <label class="block text-[10px] font-medium text-gray-600 mb-1">Botten</label>
-                                    <input type="number" id="pp_botten_mm" value="0" class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-sky-500">
+                                    <input type="number" id="pp_botten_mm" value="<%= locals.frame ? frame.pp_bottom_mm || 0 : 0 %>" class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-sky-500">
                                 </div>
                             </div>
                         </div>
@@ -124,7 +124,7 @@
                     <!-- Notes -->
                     <div class="border-t border-slate-200 pt-4">
                         <label for="notes" class="block text-xs font-medium text-gray-700 mb-1">Anteckningar</label>
-                        <textarea id="notes" name="notes" rows="2" placeholder="Valfria noteringar" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 resize-y"></textarea>
+                        <textarea id="notes" name="notes" rows="2" placeholder="Valfria noteringar" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 resize-y"><%= locals.frame ? frame.notes || '' : '' %></textarea>
                     </div>
 
                     <!-- Save as Template -->
@@ -171,7 +171,7 @@
                             Avbryt
                         </a>
                         <button type="submit" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
-                            Spara artikel
+                            <%= locals.isEdit ? 'Uppdatera artikel' : 'Spara artikel' %>
                         </button>
                     </div>
                 </form>
@@ -215,7 +215,46 @@ const availableItems = {
 document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
     updateMethodVisibility();
+    
+    // Load existing items if in edit mode
+    <% if (locals.isEdit && locals.frame) { %>
+    loadExistingItems();
+    <% } %>
 });
+
+function loadExistingItems() {
+    // Build items array from frame_order_items data
+    const frameItems = <%- JSON.stringify(locals.frameItems || []) %>;
+    
+    console.log('Loading existing items:', frameItems);
+    
+    // Add each item from database
+    frameItems.forEach(dbItem => {
+        items.push({
+            id: itemIdCounter++,
+            category: dbItem.item_type === 'labor' ? 'service' : 'article',
+            type: dbItem.item_type,
+            item_id: dbItem.item_id,
+            item_name: dbItem.item_name,
+            item_sku: dbItem.item_sku,
+            quantity: parseFloat(dbItem.quantity) || 0,
+            unit_price: parseFloat(dbItem.unit_price) || 0,
+            metadata: typeof dbItem.metadata === 'string' ? JSON.parse(dbItem.metadata) : (dbItem.metadata || {})
+        });
+    });
+    
+    renderItems();
+    calculatePrice();
+    
+    // Expand PP edges if there are non-zero PP values
+    const frame = <%- JSON.stringify(locals.frame || {}) %>;
+    if (frame.pp_left_mm || frame.pp_right_mm || frame.pp_top_mm || frame.pp_bottom_mm) {
+        const ppContainer = document.getElementById('ppEdges');
+        const ppBtn = document.getElementById('togglePP');
+        ppContainer.classList.remove('hidden');
+        ppBtn.textContent = '▾ Passepartout-kanter';
+    }
+}
 
 function setupEventListeners() {
     document.getElementById('calculation_method').addEventListener('change', updateMethodVisibility);
@@ -352,6 +391,11 @@ function updateItem(itemId, field, value) {
                 item.item_name = itemData.name;
                 item.item_sku = itemData.sku;
                 item.unit_price = parseFloat(itemData.sales_price) || 0;
+                
+                // If this is a service (labor), copy standard_hours to quantity
+                if (item.type === 'labor' && itemData.standard_hours) {
+                    item.quantity = parseFloat(itemData.standard_hours);
+                }
             }
         } else if (field === 'type') {
             item.type = value;
@@ -567,6 +611,9 @@ function calculatePrice() {
 function handleSubmit(e) {
     e.preventDefault();
     
+    console.log('handleSubmit called!');
+    console.log('Items to save:', items);
+    
     // Validate required fields
     const motivBredd = document.getElementById('motiv_bredd_mm').value;
     const motivHojd = document.getElementById('motiv_hojd_mm').value;
@@ -643,29 +690,47 @@ async function loadTemplate() {
     }
     
     try {
-        const response = await fetch(`/templates/${templateId}`);
-        const template = await response.json();
+        // Hämta mall-data från EJS-rendererad data
+        const allTemplates = <%- JSON.stringify(templates || []) %>;
+        const template = allTemplates.find(t => t.id == templateId);
+        
+        if (!template) {
+            alert('Mallen hittades inte');
+            return;
+        }
+        
+        // Parse items från JSON string
+        const templateItems = typeof template.items === 'string' ? JSON.parse(template.items) : template.items;
         
         // Load template items
-        items = (template.items || []).map((item, index) => ({
+        items = (templateItems || []).map((item, index) => ({
             id: itemIdCounter++,
             category: item.type === 'labor' ? 'service' : 'article',
-            ...item
+            type: item.type,
+            item_id: item.item_id,
+            item_name: item.item_name,
+            item_sku: item.item_sku,
+            quantity: item.quantity || 0,
+            unit_price: item.unit_price || 0,
+            metadata: item.metadata || {}
         }));
         
         // Load default PP edges if available
         if (template.default_passepartout_edges) {
-            document.getElementById('pp_vanster_mm').value = template.default_passepartout_edges.left || 0;
-            document.getElementById('pp_hoger_mm').value = template.default_passepartout_edges.right || 0;
-            document.getElementById('pp_topp_mm').value = template.default_passepartout_edges.top || 0;
-            document.getElementById('pp_botten_mm').value = template.default_passepartout_edges.bottom || 0;
+            const edges = typeof template.default_passepartout_edges === 'string' ? JSON.parse(template.default_passepartout_edges) : template.default_passepartout_edges;
+            if (edges) {
+                document.getElementById('pp_vanster_mm').value = edges.left || 0;
+                document.getElementById('pp_hoger_mm').value = edges.right || 0;
+                document.getElementById('pp_topp_mm').value = edges.top || 0;
+                document.getElementById('pp_botten_mm').value = edges.bottom || 0;
+            }
         }
         
         renderItems();
         calculatePrice();
     } catch (error) {
         console.error('Failed to load template:', error);
-        alert('Kunde inte ladda mall');
+        alert('Kunde inte ladda mall: ' + error.message);
     }
 }
 </script>

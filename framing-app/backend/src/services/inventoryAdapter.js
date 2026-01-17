@@ -72,7 +72,7 @@ async function getLabor() {
 }
 
 // Hämta alla tjänster från services-tabellen (inventory-artyx)
-// Normaliserar till samma shape som items: id, name, sku, sales_price
+// Normaliserar till samma shape som items: id, name, sku, sales_price + standard_hours
 async function getServices() {
   try {
     const result = await db.inventoryQuery(
@@ -83,6 +83,7 @@ async function getServices() {
         category,
         pricing_model,
         unit_type,
+        standard_hours,
         COALESCE(
           CASE pricing_model
             WHEN 'fixed' THEN base_price
@@ -94,6 +95,7 @@ async function getServices() {
           0
         )::numeric(12,2) AS sales_price
       FROM services
+      WHERE pricing_model = 'hourly'
       ORDER BY name`,
       []
     );

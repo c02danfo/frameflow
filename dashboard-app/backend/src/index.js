@@ -91,7 +91,13 @@ app.use(express.urlencoded({ extended: true }));
 
 // Session setup - use auth-db for shared sessions
 const pgSession = require('connect-pg-simple')(session);
-const cookieDomain = (process.env.DOMAIN || 'frameflowapp.com').replace(/^(?!\.)/, '.');
+const configuredDomain = process.env.DOMAIN || 'frameflowapp.com';
+const isLocalDomain = configuredDomain === 'localhost' || configuredDomain === '127.0.0.1';
+const cookieDomain = isLocalDomain
+  ? undefined
+  : configuredDomain.startsWith('.')
+    ? configuredDomain
+    : `.${configuredDomain}`;
 app.use(session({
   store: new pgSession({
     pool: db.pool,
@@ -105,7 +111,7 @@ app.use(session({
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-    domain: cookieDomain  // Share cookies across subdomains
+    ...(cookieDomain ? { domain: cookieDomain } : {})  // share cookies across subdomains only in production
   }
 }));
 

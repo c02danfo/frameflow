@@ -10,8 +10,16 @@ const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://localhost:3005'
 const requireAuth = (req, res, next) => {
     if (!req.session || !req.session.user) {
         const domain = process.env.DOMAIN || 'frameflowapp.com';
-        const returnTo = encodeURIComponent(`https://${req.get('host')}${req.originalUrl}`);
-        return res.redirect(`https://${domain}/auth/login?returnTo=${returnTo}`);
+        const isLocal = domain === 'localhost' || domain.includes('127.0.0.1');
+        
+        // For local dev, use http://localhost:PORT
+        // For production, use https://domain
+        const protocol = isLocal ? 'http' : 'https';
+        const host = isLocal ? req.get('host') : domain;
+        const loginUrl = isLocal ? `http://localhost:3010/auth/login` : `https://${domain}/auth/login`;
+        
+        const returnTo = encodeURIComponent(`${protocol}://${host}${req.originalUrl}`);
+        return res.redirect(`${loginUrl}?returnTo=${returnTo}`);
     }
     next();
 };
@@ -21,8 +29,14 @@ const requirePermission = (permission) => {
     return (req, res, next) => {
         if (!req.session || !req.session.user) {
             const domain = process.env.DOMAIN || 'frameflowapp.com';
-            const returnTo = encodeURIComponent(`https://${req.get('host')}${req.originalUrl}`);
-            return res.redirect(`https://${domain}/auth/login?returnTo=${returnTo}`);
+            const isLocal = domain === 'localhost' || domain.includes('127.0.0.1');
+            
+            const protocol = isLocal ? 'http' : 'https';
+            const host = isLocal ? req.get('host') : domain;
+            const loginUrl = isLocal ? `http://localhost:3010/auth/login` : `https://${domain}/auth/login`;
+            
+            const returnTo = encodeURIComponent(`${protocol}://${host}${req.originalUrl}`);
+            return res.redirect(`${loginUrl}?returnTo=${returnTo}`);
         }
         
         const userPermissions = req.session.user.permissions || [];

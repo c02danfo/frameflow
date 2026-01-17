@@ -23,116 +23,77 @@
 
         <!-- Form -->
         <form method="POST" action="/services" class="bg-white rounded-lg shadow-sm p-6 space-y-6">
-            <!-- Basic Information -->
-            <div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Grundinformation</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Namn <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" name="name" required
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                               placeholder="T.ex. Glasbyte, Montage av canvasdukt">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
-                        <input type="text" name="category" list="category-list"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                               placeholder="T.ex. Glasbyte, Montage">
-                        <datalist id="category-list">
-                            <% categories.forEach(cat => { %>
-                                <option value="<%= cat %>">
-                            <% }) %>
-                        </datalist>
-                    </div>
-
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Beskrivning</label>
-                        <textarea name="description" rows="3"
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                                  placeholder="Beskriv tjänsten..."></textarea>
-                    </div>
+            <!-- Grundinformation -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        Namn <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" name="name" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                           placeholder="T.ex. Ramlimning, Glasbyte">
                 </div>
-            </div>
 
-            <!-- Pricing -->
-            <div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Prissättning</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Prissättningsmodell <span class="text-red-500">*</span>
-                        </label>
-                        <select name="pricing_model" id="pricing_model" required onchange="updatePricingFields()"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500">
-                            <option value="fixed">Fast pris</option>
-                            <option value="hourly">Timpris</option>
-                            <option value="per_unit">Per enhet</option>
-                            <option value="base_plus_hourly">Bas + timpris</option>
-                        </select>
-                    </div>
-
-                    <div id="base_price_field">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Fast pris (kr)</label>
-                        <input type="number" name="base_price" step="0.01" min="0"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                               placeholder="0.00">
-                    </div>
-
-                    <div id="hourly_rate_field" style="display: none;">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Timpris (kr/timme)</label>
-                        <input type="number" name="hourly_rate" step="0.01" min="0"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                               placeholder="0.00">
-                    </div>
-
-                    <div id="price_per_unit_field" style="display: none;">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Pris per enhet (kr)</label>
-                        <input type="number" name="price_per_unit" step="0.01" min="0"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                               placeholder="0.00">
-                    </div>
-
-                    <div id="unit_type_field" style="display: none;">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Enhetstyp</label>
-                        <input type="text" name="unit_type"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                               placeholder="T.ex. cm, dm², st">
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Intern kostnad per timme (kr)</label>
-                        <input type="number" name="internal_cost_per_hour" step="0.01" min="0"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                               placeholder="0.00">
-                        <p class="text-xs text-gray-500 mt-1">För marginalkalkyl</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Time Estimation -->
-            <div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Tidsestimering</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Standard tid (minuter)</label>
-                        <input type="number" name="default_duration_minutes" min="0"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                               placeholder="0">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Notes -->
-            <div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Anteckningar</h3>
                 <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+                    <input type="text" name="category" list="category-list"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                           placeholder="T.ex. Montage, Glas">
+                    <datalist id="category-list">
+                        <% categories.forEach(cat => { %>
+                            <option value="<%= cat %>">
+                        <% }) %>
+                    </datalist>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Beskrivning</label>
+                    <textarea name="description" rows="3"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                              placeholder="Beskriv tjänsten... (valfritt)"></textarea>
+                </div>
+            </div>
+
+            <!-- Prissättning (alltid timpris) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Timpris (kr/timme) *</label>
+                    <input type="number" name="base_price" step="0.01" min="0" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                           placeholder="T.ex. 450.00">
+                    <p class="text-xs text-gray-500 mt-1">Används även som hourly_rate</p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Standardtid (timmar) *</label>
+                    <input type="number" name="standard_hours" step="0.25" min="0" value="1.0" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                           placeholder="T.ex. 0.5, 1.0, 2.0">
+                    <p class="text-xs text-gray-500 mt-1">Kopieras in i order och kan justeras där</p>
+                </div>
+
+                <div class="md:col-span-2 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <p class="text-sm font-medium text-blue-900 mb-1">Beräknat standardpris</p>
+                    <p class="text-2xl font-bold text-blue-700" id="calculated-price">0.00 kr</p>
+                    <p class="text-xs text-blue-600 mt-1">Timpris × Standardtid (kan justeras per order)</p>
+                </div>
+            </div>
+
+            <!-- Intern info -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Intern kostnad per timme (kr)</label>
+                    <input type="number" name="internal_cost_per_hour" step="0.01" min="0"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                           placeholder="0.00">
+                    <p class="text-xs text-gray-500 mt-1">För marginalkalkyl (valfritt)</p>
+                </div>
+
+                <div class="md:col-span-2">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Interna anteckningar</label>
                     <textarea name="internal_notes" rows="3"
                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                              placeholder="Interna anteckningar..."></textarea>
+                              placeholder="Interna anteckningar... (valfritt)"></textarea>
                 </div>
             </div>
 
@@ -150,33 +111,18 @@
 </div>
 
 <script>
-function updatePricingFields() {
-    const model = document.getElementById('pricing_model').value;
-    const baseField = document.getElementById('base_price_field');
-    const hourlyField = document.getElementById('hourly_rate_field');
-    const unitField = document.getElementById('price_per_unit_field');
-    const unitTypeField = document.getElementById('unit_type_field');
-    
-    // Hide all first
-    baseField.style.display = 'none';
-    hourlyField.style.display = 'none';
-    unitField.style.display = 'none';
-    unitTypeField.style.display = 'none';
-    
-    // Show relevant fields
-    if (model === 'fixed') {
-        baseField.style.display = 'block';
-    } else if (model === 'hourly') {
-        hourlyField.style.display = 'block';
-    } else if (model === 'per_unit') {
-        unitField.style.display = 'block';
-        unitTypeField.style.display = 'block';
-    } else if (model === 'base_plus_hourly') {
-        baseField.style.display = 'block';
-        hourlyField.style.display = 'block';
-    }
-}
+  const timPris = document.querySelector('input[name="base_price"]');
+  const standardTid = document.querySelector('input[name="standard_hours"]');
+  const prisLabel = document.getElementById('calculated-price');
 
-// Initialize on page load
-updatePricingFields();
+  function uppdateraPris() {
+    const pris = parseFloat(timPris.value) || 0;
+    const tid = parseFloat(standardTid.value) || 0;
+    const total = pris * tid;
+    prisLabel.textContent = total.toFixed(2) + ' kr';
+  }
+
+  timPris.addEventListener('input', uppdateraPris);
+  standardTid.addEventListener('input', uppdateraPris);
+  uppdateraPris();
 </script>

@@ -1,108 +1,300 @@
-<div class="max-w-screen-2xl mx-auto">
-    <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
-        <div>
-            <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Ordrar</h2>
-            <p class="text-sm font-medium text-slate-500">Hantera inramningsordrar och offerter</p>
-        </div>
-        <a href="/orders/new" class="inline-flex items-center px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold rounded-lg transition-colors">
-            Ny order
-        </a>
-    </div>
+<%
+    const currentQuery = typeof query !== 'undefined' && query ? query : {};
+    const statuses = typeof statusOptions !== 'undefined' && Array.isArray(statusOptions) ? statusOptions : [];
+    const orderList = Array.isArray(orders) ? orders : [];
+    const hasOrders = orderList.length > 0;
+  const formatDate = (value) => {
+    if (!value) return '-';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '-';
+    return date.toLocaleDateString('sv-SE');
+  };
+  const statusChipClass = (status) => {
+    switch (status) {
+      case 'Offert':
+        return 'bg-amber-50 text-amber-700 border border-amber-100';
+      case 'Ej påbörjad':
+        return 'bg-blue-50 text-blue-700 border border-blue-100';
+      case 'Påbörjad':
+        return 'bg-purple-50 text-purple-700 border border-purple-100';
+      case 'Klart':
+        return 'bg-emerald-50 text-emerald-700 border border-emerald-100';
+      case 'Utlämnad':
+        return 'bg-slate-50 text-slate-700 border border-slate-100';
+      default:
+        return 'bg-gray-50 text-gray-700 border border-gray-200';
+    }
+  };
+    const formatAmount = (value) => {
+        if (value === null || value === undefined || value === '') return '-';
+        const num = parseFloat(value);
+        if (Number.isNaN(num)) return '-';
+        return num.toFixed(2) + ' kr';
+    };
+%>
 
-    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-slate-200">
-                <thead>
-                    <tr class="bg-slate-50/50">
-                        <th class="px-6 py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider">Ordernummer</th>
-                        <th class="px-6 py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider">Kund</th>
-                        <th class="px-6 py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider">Datum</th>
-                        <th class="px-6 py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-3 text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider">Antal artiklar</th>
-                        <th class="px-6 py-3 text-right text-[10px] font-bold text-slate-400 uppercase tracking-wider">Totalt exkl. moms</th>
-                        <th class="px-6 py-3 text-right text-[10px] font-bold text-slate-400 uppercase tracking-wider">Åtgärder</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100 bg-white">
-                    <% if (orders.length === 0) { %>
+<div class="bg-gray-50 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+            <div>
+                <h2 class="text-3xl font-bold text-gray-900">Ordrar</h2>
+                <p class="text-sm text-gray-600 mt-1">Hantera inramningsordrar och offerter</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <a href="/orders/new" class="inline-flex items-center px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-lg shadow-sm transition-colors">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Ny order
+                </a>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+            <form method="GET" action="/orders" class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Sök</label>
+                    <input type="text" name="q" value="<%= currentQuery.q || '' %>" placeholder="Ordernummer, kund, status..." 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                    <select name="status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                        <option value="">Alla statusar</option>
+                        <% statuses.forEach((status) => { %>
+                            <option value="<%= status %>" <%= currentQuery.status === status ? 'selected' : '' %>><%= status %></option>
+                        <% }) %>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Från Datum</label>
+                    <input type="date" name="dateFrom" value="<%= currentQuery.dateFrom || '' %>" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Till Datum</label>
+                    <input type="date" name="dateTo" value="<%= currentQuery.dateTo || '' %>" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                </div>
+                <div class="flex items-end gap-2 lg:col-span-4">
+                    <button type="submit" class="flex-1 px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white font-medium rounded-lg transition-colors">
+                        Filtrera
+                    </button>
+                    <a href="/orders" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors">
+                        Rensa
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Desktop table view -->
+        <div class="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
+            <div class="overflow-x-auto hidden lg:block">
+                <table class="min-w-full divide-y divide-gray-200" id="ordersTable">
+                    <thead class="bg-gray-50">
                         <tr>
-                            <td colspan="7" class="px-6 py-12 text-center">
-                                <div class="flex flex-col items-center justify-center">
-                                    <div class="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mb-3">
-                                        <svg class="w-6 h-6 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onclick="sortOrdersTable(0)">
+                                Order <span class="sort-arrow">↕</span>
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onclick="sortOrdersTable(1)">
+                                Kund <span class="sort-arrow">↕</span>
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onclick="sortOrdersTable(2)">
+                                Datum <span class="sort-arrow">↕</span>
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onclick="sortOrdersTable(3)">
+                                Status <span class="sort-arrow">↕</span>
+                            </th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onclick="sortOrdersTable(4)">
+                                Artiklar <span class="sort-arrow">↕</span>
+                            </th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onclick="sortOrdersTable(5)">
+                                Totalt exkl. moms <span class="sort-arrow">↕</span>
+                            </th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Åtgärder</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <% if (!hasOrders) { %>
+                            <tr>
+                                <td colspan="7" class="px-6 py-12 text-center">
+                                    <div class="flex flex-col items-center">
+                                        <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                         </svg>
+                                        <p class="text-gray-500">Inga ordrar hittades</p>
                                     </div>
-                                    <p class="text-sm font-medium text-slate-500">Inga ordrar hittades</p>
-                                </div>
-                            </td>
-                        </tr>
-                    <% } else { %>
-                        <% orders.forEach(order => { %>
-                        <tr class="hover:bg-slate-50/50 transition-colors group">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="text-sm font-bold text-slate-900 group-hover:text-sky-600 transition-colors"><%= order.order_number %></span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="text-sm font-medium text-slate-600"><%= order.customer_name %></span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="text-sm text-slate-500"><%= order.order_date ? new Date(order.order_date).toISOString().split('T')[0] : '-' %></span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <% 
-                                let statusClass = 'bg-slate-50 text-slate-700 border border-slate-100';
-                                if (order.status === 'Offert') {
-                                    statusClass = 'bg-amber-50 text-amber-700 border border-amber-100';
-                                } else if (order.status === 'Ej påbörjad') {
-                                    statusClass = 'bg-blue-50 text-blue-700 border border-blue-100';
-                                } else if (order.status === 'Påbörjad') {
-                                    statusClass = 'bg-purple-50 text-purple-700 border border-purple-100';
-                                } else if (order.status === 'Klart') {
-                                    statusClass = 'bg-emerald-50 text-emerald-700 border border-emerald-100';
-                                } else if (order.status === 'Utlämnad') {
-                                    statusClass = 'bg-slate-50 text-slate-700 border border-slate-100';
-                                }
-                                %>
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider <%= statusClass %>">
-                                    <%= order.status %>
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-center">
-                                <span class="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700">
-                                    <%= order.article_count || 0 %>
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right">
-                                <span class="text-sm font-bold text-slate-900"><%= order.total_price_excl_moms || 0 %> kr</span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right">
-                                <div class="flex items-center justify-end gap-2">
-                                    <a href="/orders/<%= order.id %>" 
-                                       class="p-2 text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-all"
-                                       title="Visa">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                    </a>
-                                    <% if (order.status === 'Offert') { %>
-                                        <form method="POST" action="/orders/<%= order.id %>/delete" class="inline" onsubmit="return confirm('Är du säker på att du vill radera denna order?');">
-                                            <button type="submit" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Radera">
-                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </td>
+                            </tr>
+                        <% } else { %>
+                            <% orderList.forEach(order => { %>
+                                <tr class="hover:bg-gray-50 cursor-pointer transition-colors" onclick="window.location='/orders/<%= order.id %>'">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-semibold text-gray-900"><%= order.order_number %></div>
+                                        <div class="text-xs text-gray-400">#<%= order.id %></div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="text-sm text-gray-700"><%= order.customer_name %></span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="text-sm text-gray-600"><%= formatDate(order.order_date) %></span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider <%= statusChipClass(order.status) %>">
+                                            <%= order.status %>
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                                        <span class="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">
+                                            <%= order.article_count || 0 %>
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right">
+                                        <span class="text-sm font-semibold text-gray-900">
+                                            <%= formatAmount(order.total_price_excl_moms) %>
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right" onclick="event.stopPropagation()">
+                                        <div class="flex items-center justify-end gap-1">
+                                            <a href="/orders/<%= order.id %>" 
+                                               class="inline-flex p-1.5 text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-all"
+                                               title="Visa">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                                 </svg>
-                                            </button>
-                                        </form>
-                                    <% } %>
-                                </div>
-                            </td>
-                        </tr>
-                        <% }); %>
-                    <% } %>
-                </tbody>
-            </table>
+                                            </a>
+                                            <% if (order.status !== 'Utlämnad') { %>
+                                                <form method="POST" action="/orders/<%= order.id %>/delete" style="display: inline;" onsubmit="return confirm('Är du säker på att du vill radera denna order?');">
+                                                    <button type="submit" class="inline-flex p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Radera">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                        </svg>
+                                                    </button>
+                                                </form>
+                                            <% } %>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Mobile card view -->
+        <div class="lg:hidden space-y-4">
+            <% if (!hasOrders) { %>
+                <div class="bg-white rounded-lg shadow-sm p-8 text-center">
+                    <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    <p class="text-gray-500">Inga ordrar hittades</p>
+                </div>
+            <% } else { %>
+                <% orderList.forEach(order => { %>
+                    <div class="bg-white rounded-lg shadow-sm p-4 cursor-pointer hover:shadow-md transition-shadow" onclick="window.location='/orders/<%= order.id %>'">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h3 class="text-base font-semibold text-gray-900">Order <%= order.order_number %></h3>
+                                <p class="text-sm text-gray-500"><%= order.customer_name %></p>
+                            </div>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider <%= statusChipClass(order.status) %>">
+                                <%= order.status %>
+                            </span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 text-sm mt-4">
+                            <div>
+                                <span class="text-gray-500">Datum</span>
+                                <p class="font-medium text-gray-900"><%= formatDate(order.order_date) %></p>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-gray-500">Artiklar</span>
+                                <p class="font-semibold text-gray-900"><%= order.article_count || 0 %> st</p>
+                            </div>
+                            <div>
+                                <span class="text-gray-500">Totalt exkl. moms</span>
+                                <p class="font-semibold text-gray-900"><%= formatAmount(order.total_price_excl_moms) %></p>
+                            </div>
+                        </div>
+                        <div class="flex gap-2 mt-4 pt-4 border-t border-gray-100" onclick="event.stopPropagation()">
+                            <a href="/orders/<%= order.id %>" class="flex-1 inline-flex items-center justify-center px-3 py-2 bg-sky-50 text-sky-700 text-sm font-medium rounded-lg hover:bg-sky-100 transition-colors">
+                                Visa
+                            </a>
+                            <% if (order.status !== 'Utlämnad') { %>
+                                <form method="POST" action="/orders/<%= order.id %>/delete" style="display: inline;" class="flex-1" onsubmit="return confirm('Är du säker på att du vill radera denna order?');">
+                                    <button type="submit" class="w-full inline-flex items-center justify-center px-3 py-2 bg-red-50 text-red-700 text-sm font-medium rounded-lg hover:bg-red-100 transition-colors">
+                                        Radera
+                                    </button>
+                                </form>
+                            <% } %>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } %>
         </div>
     </div>
 </div>
+
+<script>
+let ordersSortDirections = {};
+
+function sortOrdersTable(columnIndex) {
+    const table = document.getElementById('ordersTable');
+    if (!table) return;
+
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr')).filter(row => !row.querySelector('td[colspan]'));
+
+    if (!rows.length) return;
+
+    ordersSortDirections[columnIndex] = ordersSortDirections[columnIndex] === 'asc' ? 'desc' : 'asc';
+    const direction = ordersSortDirections[columnIndex];
+
+    rows.sort((a, b) => {
+        const aCell = a.cells[columnIndex];
+        const bCell = b.cells[columnIndex];
+        if (!aCell || !bCell) return 0;
+
+        const aText = aCell.innerText.trim();
+        const bText = bCell.innerText.trim();
+
+        let aValue = aText;
+        let bValue = bText;
+
+        if (columnIndex === 2) {
+            aValue = Date.parse(aText) || 0;
+            bValue = Date.parse(bText) || 0;
+        } else if (columnIndex === 4 || columnIndex === 5) {
+            const cleanNumber = (str) => {
+                const cleaned = str.replace(/[^0-9.-]/g, '');
+                return cleaned ? parseFloat(cleaned) : 0;
+            };
+            aValue = cleanNumber(aText);
+            bValue = cleanNumber(bText);
+        } else {
+            aValue = aText.toLowerCase();
+            bValue = bText.toLowerCase();
+        }
+
+        if (aValue === bValue) return 0;
+        if (direction === 'asc') {
+            return aValue > bValue ? 1 : -1;
+        }
+        return aValue < bValue ? 1 : -1;
+    });
+
+    rows.forEach(row => tbody.appendChild(row));
+
+    table.querySelectorAll('thead .sort-arrow').forEach((arrow, index) => {
+        if (index === columnIndex) {
+            arrow.textContent = direction === 'asc' ? '↑' : '↓';
+        } else {
+            arrow.textContent = '↕';
+        }
+    });
+}
+</script>

@@ -1,16 +1,16 @@
 #!/bin/bash
 echo "🚀 Starting all FrameFlow services..."
 
-cd /Users/home/Projects/frameflow/frameflow/auth-service/backend && npm run dev > /tmp/frameflow-auth.log 2>&1 &
+cd /Users/home/Projects/frameflow/auth-service/backend && npm run dev > /tmp/frameflow-auth.log 2>&1 &
 echo "  ✓ auth-service (port 3005)"
 
-cd /Users/home/Projects/frameflow/frameflow/dashboard-app/backend && npm run dev > /tmp/frameflow-dashboard.log 2>&1 &
+cd /Users/home/Projects/frameflow/dashboard-app/backend && npm run dev > /tmp/frameflow-dashboard.log 2>&1 &
 echo "  ✓ dashboard-app (port 3010)"
 
-cd /Users/home/Projects/frameflow/frameflow/framing-app/backend && npm run dev > /tmp/frameflow-framing.log 2>&1 &
+cd /Users/home/Projects/frameflow/framing-app/backend && npm run dev > /tmp/frameflow-framing.log 2>&1 &
 echo "  ✓ framing-app (port 3011)"
 
-cd /Users/home/Projects/frameflow/frameflow/inventory-artyx/backend && npm run dev > /tmp/frameflow-inventory.log 2>&1 &
+cd /Users/home/Projects/frameflow/inventory-artyx/backend && npm run dev > /tmp/frameflow-inventory.log 2>&1 &
 echo "  ✓ inventory-artyx (port 3015)"
 
 sleep 3

@@ -84,18 +84,30 @@ DECLARE
     tenant_id INT;
     admin_role_id INT;
     admin_perm_id INT;
+    admin_user_id INT;
 BEGIN
     SELECT id INTO tenant_id FROM tenants WHERE slug = 'demo';
     
     INSERT INTO roles (tenant_id, name, description)
     VALUES (tenant_id, 'admin', 'Administrator with full access')
-    ON CONFLICT DO NOTHING
-    RETURNING id INTO admin_role_id;
+    ON CONFLICT DO NOTHING;
     
-    SELECT id INTO admin_role_id FROM roles WHERE tenant_id = tenant_id AND name = 'admin';
+    SELECT id INTO admin_role_id FROM roles WHERE roles.tenant_id = tenant_id AND name = 'admin';
     SELECT id INTO admin_perm_id FROM permissions WHERE name = 'admin';
     
     INSERT INTO role_permissions (role_id, permission_id)
     VALUES (admin_role_id, admin_perm_id)
+    ON CONFLICT DO NOTHING;
+    
+    -- Create default admin user
+    INSERT INTO users (tenant_id, email, password_hash, first_name, last_name, is_active)
+    VALUES (tenant_id, 'admin@demo.local', '$2b$10$E22/NZtCf9ofxal77efDPuWk7g0woTAl7SQxSsZOjuBIN4S478p5S', 'Admin', 'User', true)
+    ON CONFLICT DO NOTHING;
+    
+    SELECT id INTO admin_user_id FROM users WHERE email = 'admin@demo.local' AND users.tenant_id = tenant_id;
+    
+    -- Assign admin role to admin user
+    INSERT INTO user_roles (user_id, role_id)
+    VALUES (admin_user_id, admin_role_id)
     ON CONFLICT DO NOTHING;
 END $$;

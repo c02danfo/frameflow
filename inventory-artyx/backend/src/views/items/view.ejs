@@ -70,10 +70,10 @@
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight mb-1">Lev. Art.nr</p>
                         <p class="text-sm font-mono font-bold text-slate-900"><%= item.supplier_item_number || '-' %></p>
                     </div>
-                    <% if (item.description) { %>
+                    <% if (item.notes) { %>
                     <div class="col-span-2 pt-4 border-t border-slate-100">
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight mb-1">Beskrivning</p>
-                        <p class="text-sm text-slate-600 whitespace-pre-line"><%= item.description %></p>
+                        <p class="text-sm text-slate-600 whitespace-pre-line"><%= item.notes %></p>
                     </div>
                     <% } %>
                 </div>

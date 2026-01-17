@@ -48,19 +48,86 @@
                         <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Prissättning</h3>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-tight mb-1">Inköpspris</label>
-                                <input type="number" name="purchase_price" step="0.01" value="<%= item.purchase_price || '' %>" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500">
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-tight mb-1">Prisenhet *</label>
+                                <select name="pricing_unit" id="pricing_unit_edit" required class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500">
+                                    <option value="st" <%= (item.pricing_unit || 'st') === 'st' ? 'selected' : '' %>>Per styck (st)</option>
+                                    <option value="m" <%= item.pricing_unit === 'm' ? 'selected' : '' %>>Per meter (m)</option>
+                                    <option value="m2" <%= item.pricing_unit === 'm2' ? 'selected' : '' %>>Per kvadratmeter (m²)</option>
+                                    <option value="kg" <%= item.pricing_unit === 'kg' ? 'selected' : '' %>>Per kilogram (kg)</option>
+                                    <option value="l" <%= item.pricing_unit === 'l' ? 'selected' : '' %>>Per liter (l)</option>
+                                </select>
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-tight mb-1">Försäljningspris</label>
-                                <input type="number" name="sales_price" step="0.01" value="<%= item.sales_price || '' %>" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500">
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-tight mb-1">
+                                    <span id="purchase_price_label_edit">Inköpspris per <%= item.pricing_unit || 'st' %></span>
+                                </label>
+                                <input type="number" id="purchase_price_edit" name="purchase_price" step="0.01" value="<%= item.purchase_price || '' %>" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500">
                             </div>
                             <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-tight mb-1">
+                                    <span id="sales_price_label_edit">Försäljningspris per <%= item.pricing_unit || 'st' %></span>
+                                </label>
+                                <input type="number" id="sales_price_edit" name="sales_price" step="0.01" value="<%= item.sales_price || '' %>" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500">
+                            </div>
+                            <div class="md:col-span-3">
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-tight mb-1">Prisgrupp</label>
-                                <input type="text" name="price_group" value="<%= item.price_group || '' %>" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500">
+                                <select id="price_group_edit" name="price_group" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500">
+                                    <option value="">Ingen prisgrupp</option>
+                                    <% if (locals.priceGroups && priceGroups.length > 0) { %>
+                                        <% priceGroups.forEach(pg => { %>
+                                            <option value="<%= pg.name %>" <%= item.price_group === pg.name ? 'selected' : '' %>><%= pg.name %> (<%= pg.markup_percentage %>% påslag)</option>
+                                        <% }); %>
+                                    <% } %>
+                                </select>
                             </div>
                         </div>
                     </div>
+
+                    <script>
+                    // Price groups with markup percentages
+                    const priceGroupsEdit = {
+                        <% if (locals.priceGroups && priceGroups.length > 0) { %>
+                            <% priceGroups.forEach((pg, index) => { %>
+                                '<%= pg.name %>': <%= pg.markup_percentage %><%= index < priceGroups.length - 1 ? ',' : '' %>
+                            <% }); %>
+                        <% } %>
+                    };
+
+                    // Update price labels based on selected pricing unit
+                    document.getElementById('pricing_unit_edit').addEventListener('change', function() {
+                        const unit = this.value;
+                        const unitLabels = {
+                            'st': 'styck',
+                            'm': 'meter',
+                            'm2': 'kvadratmeter (m²)',
+                            'kg': 'kilogram',
+                            'l': 'liter'
+                        };
+                        const label = unitLabels[unit] || 'enhet';
+                        document.getElementById('purchase_price_label_edit').textContent = `Inköpspris per ${label}`;
+                        document.getElementById('sales_price_label_edit').textContent = `Försäljningspris per ${label}`;
+                    });
+
+                    // Calculate sales price when purchase price or price group changes
+                    function calculateSalesPriceEdit() {
+                        const purchasePrice = parseFloat(document.getElementById('purchase_price_edit').value);
+                        const priceGroup = document.getElementById('price_group_edit').value;
+                        const salesPriceInput = document.getElementById('sales_price_edit');
+                        
+                        if (purchasePrice > 0 && priceGroup && priceGroupsEdit[priceGroup]) {
+                            const markup = priceGroupsEdit[priceGroup];
+                            const salesPrice = purchasePrice * (markup / 100.0);
+                            salesPriceInput.value = salesPrice.toFixed(2);
+                            salesPriceInput.classList.add('bg-green-50', 'ring-2', 'ring-green-500/20');
+                            setTimeout(() => {
+                                salesPriceInput.classList.remove('bg-green-50', 'ring-2', 'ring-green-500/20');
+                            }, 1000);
+                        }
+                    }
+
+                    document.getElementById('purchase_price_edit').addEventListener('input', calculateSalesPriceEdit);
+                    document.getElementById('price_group_edit').addEventListener('change', calculateSalesPriceEdit);
+                    </script>
 
                     <!-- Inventory -->
                     <div class="pt-8 border-t border-slate-100">
@@ -80,7 +147,7 @@
                     <!-- Description -->
                     <div class="pt-8 border-t border-slate-100">
                         <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Beskrivning</h3>
-                        <textarea name="description" rows="4" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"><%= item.description || '' %></textarea>
+                        <textarea name="description" rows="4" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"><%= item.notes || '' %></textarea>
                     </div>
 
                     <!-- Actions -->
